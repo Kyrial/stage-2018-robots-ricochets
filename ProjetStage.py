@@ -7,15 +7,17 @@ class interface:
         self.fenetre = fen
 
 
-    def creerCanvas(self, L, l):
+    def creerCanvas(self, L, l, case):
         self.canvas = Canvas(self.fenetre, width=L*50+50, height=l*50+50,
                              borderwidth=5,background="white")
         self.canvas['scrollregion'] = (-25,-25,L*50+25,l*50+25)
 
         for li in range(0,L):
             for co in range(0,l):
-                self.canvas.create_rectangle(50*li,50*co,50*li+50,50*co+50,
+                Id= self.canvas.create_rectangle(50*li,50*co,50*li+50,50*co+50,
                                         fill='blue', tags= 'carre')
+                case[co][li].setId(Id)
+                
         
         self.canvas.grid()
 
@@ -31,9 +33,11 @@ class interface:
 
     def placeRobot(self,robot):
        
-        self.canvas.create_oval((robot.getX()*50)+5,(robot.getY()*50)+5,
+        identifiant = self.canvas.create_oval((robot.getX()*50)+5,(robot.getY()*50)+5,
                                 (robot.getX()*50)+45,(robot.getY()*50)+45,
                                 fill=robot.getCouleur(), tags="robot")
+
+        return identifiant
 
 
 
@@ -42,6 +46,7 @@ class robot:
         self.x=x
         self.y=y
         self.couleur=couleur
+        self.Id=0
 
     ##getter
     def getX(self):
@@ -50,6 +55,8 @@ class robot:
         return self.y
     def getCouleur(self):
         return self.couleur
+    def getId(self):
+        return self.Id
     ##setter
     def setX(self,a):
         self.x = a
@@ -57,9 +64,10 @@ class robot:
         self.y = a
     def setCouleur(self,a):
         self.couleur =a
+    def setId(self, a):
+        self.Id = a
 
     
- 
 
 
 class case:
@@ -73,6 +81,7 @@ class case:
         self.droite = droite
         self.gauche = gauche
         self.robot = robot
+        self.Id = 0
 
 
         #gère un ou plusieur mur suivant l'aléatoire
@@ -95,6 +104,8 @@ class case:
         return self.gauche
     def getRobot(self):
         return self.robot
+    def getId(self):
+        return self.Id
 
     ##setter
     def setHaut(self, x):
@@ -107,6 +118,8 @@ class case:
         self.gauche = x
     def setRobot(self, x):
         self.robot = x
+    def setId(self, a):
+        self.Id = a
 
     ##genere mur aléatoire
     def ajoutAleatMur(self):
@@ -204,8 +217,8 @@ class matrice:
                 if j==self.l-1:
                     self.tab[i][j].setBas(True)
 
-                print(self.tab[i][j].__dict__)            
-            print()
+                #print(self.tab[i][j].__dict__)            
+            #print()
 
         self.initBot()
         self.creerInterface()
@@ -226,24 +239,212 @@ class matrice:
 
     def creerInterface(self):
         self.f=interface(Tk())
-        self.f.creerCanvas(self.L,self.l)
+        self.f.creerCanvas(self.L,self.l, self.tab)
 
         #on place les murs
         for i in range((self.L) ):
             for j in range(self.l):
                 self.f.placeMur(self.tab[i][j],i,j)
-
+                
         #on place les robots
-        for i in range(self.getRobot()):
-            self.f.placeRobot(self.tabR[i])
+        for i in range(self.getRobot()):            
+            Id = self.f.placeRobot(self.tabR[i])
 
+            ##on lie l'Id du cercle au robot
+            self.tabR[i].setId(Id)
+            
 
 
  
 
-    def clavier(self,event):
-        print("miaou")
+    def clique(self,event):
+        global selection
+        global lastItem
+        x = self.f.canvas.canvasx (event.x)
+        y = self.f.canvas.canvasy (event.y)
+        print(x,"  ", y)
+        
+        if selection==False:
+            lastItem=self.f.canvas.find_closest(x, y,start= "robot")
+            print(lastItem)
+            print(self.f.canvas.itemcget(lastItem, "tags"))
+            if self.f.canvas.itemcget(lastItem, "tags")== "robot current":
+                selection=True
+                ##ajouter couleur des zones accessibles
+                self.afficheMoveCase(True)
+                
+        else:
+            print("coords :",self.f.canvas.coords(lastItem))
+            coords = self.f.canvas.coords(lastItem)
+            print("x = ", x ," et y = ", y)
+            self.afficheMoveCase(False)
+            if( coords[0] <= x <=  coords[2]  and y <= coords[1]):                
+                self.deplaceH()
+            elif( coords[0] <= x <=  coords[2]  and  coords[3] <= y ):               
+                self.deplaceB()
+            elif( x <=  coords[0]  and  coords[1] <= y <= coords[3]):              
+                self.deplaceG()
+            elif(   coords[2] <= x  and  coords[1] <= y <= coords[3]):
+                self.deplaceD()                
+
             
+            selection = False
+
+               
+
+    def afficheMoveCase(self, boolean):
+        global lastItem
+        for i in range(self.getRobot()):
+            if self.tabR[i].getId() == lastItem[0]:
+                x =  self.tabR[i].getX()
+                y =  self.tabR[i].getY()
+                
+                ymin = y - self.movePossibleH(x, y)
+                ymax = y + self.movePossibleB(x, y)
+                xmin = x - self.movePossibleG(x, y)
+                xmax = x + self.movePossibleD(x, y)
+                if boolean:
+                    for y in range(ymin, ymax+1):
+                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="#2e93f9")
+                    y =  self.tabR[i].getY()
+                    for x in range(xmin, xmax+1):
+                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="#2e93f9")
+                else:
+                    for y in range(ymin, ymax+1):
+                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="blue")
+                    y =  self.tabR[i].getY()
+                    for x in range(xmin, xmax+1):
+                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="blue")
+
+                
+
+
+
+
+
+    def movePossibleH(self, x, y):
+        compteur=0       
+        while (self.tab[x][y].getHaut() == False and
+                self.tab[x][y-1].getBas() == False and
+                self.tab[x][y-1].getRobot() == False ):
+            y=y-1
+            compteur=compteur + 1
+        return compteur;
+
+
+    def movePossibleB(self, x, y):
+        compteur=0                    
+        while (self.tab[x][y].getBas() == False and
+                self.tab[x][y+1].getHaut() == False and
+                self.tab[x][y+1].getRobot() == False ):
+            y=y+1
+            compteur=compteur + 1
+        return compteur
+    
+    def movePossibleG(self, x, y):
+        compteur=0                    
+        while (self.tab[x][y].getGauche() == False and
+                self.tab[x-1][y].getDroite() == False and
+                self.tab[x-1][y].getRobot() == False ):
+            x=x-1      
+            compteur=compteur + 1
+        return compteur
+
+ 
+    def movePossibleD(self, x, y):
+        compteur=0
+        while (self.tab[x][y].getDroite() == False and
+                self.tab[x+1][y].getGauche() == False and
+                self.tab[x+1][y].getRobot() == False ):
+            x=x+1
+            compteur=compteur + 1
+        return compteur
+
+   
+
+ 
+    
+    def deplaceH(self):        
+        global lastItem
+        for i in range(self.getRobot()):
+            if self.tabR[i].getId() == lastItem[0]:
+
+
+                x =  self.tabR[i].getX()
+                y =  self.tabR[i].getY()
+
+                compteur = self.movePossibleH(x,y)
+                ##si compteur n'est pas nul, le robot a bouge
+                if compteur != 0:
+                    ##Les informations doivent etre actualise:
+                    self.tab[x][y].setRobot( False)
+                    y=y-compteur ##actualise y
+                    self.tab[x][y].setRobot( True )
+                    self.tabR[i].setY(y)
+                    ##modif de l'interface graphique:
+                    print("x = ", x ," et y = ", y)
+                    self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)
+
+    def deplaceB(self):        
+            global lastItem
+            for i in range(self.getRobot()):
+                if self.tabR[i].getId() == lastItem[0]:
+
+                    x =  self.tabR[i].getX()
+                    y =  self.tabR[i].getY()
+                    compteur = self.movePossibleB(x, y)
+                    
+                    ##si compteur n'est pas nul, le robot a bouge
+                    if compteur != 0:
+                        ##Les informations doivent etre actualise:
+                        self.tab[x][y].setRobot( False)
+                        y=y+compteur ##actualise y
+                        self.tab[x][y].setRobot( True )
+                        self.tabR[i].setY(y)
+                        ##modif de l'interface graphique:
+                        print("x = ", x ," et y = ", y)
+                        self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)                
+            
+    def deplaceG(self):        
+            global lastItem
+            for i in range(self.getRobot()):
+                if self.tabR[i].getId() == lastItem[0]:
+
+                    x =  self.tabR[i].getX()
+                    y =  self.tabR[i].getY()
+                    compteur=self.movePossibleG(x, y)                    
+
+                    ##si compteur n'est pas nul, le robot a bouge
+                    if compteur != 0:
+                        ##Les informations doivent etre actualise:
+                        self.tab[x][y].setRobot( False)
+                        x=x-compteur ##actualise x
+                        self.tab[x][y].setRobot( True )
+                        self.tabR[i].setX(x)
+                        ##modif de l'interface graphique:
+                        print("x = ", x ," et y = ", y)
+                        self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)                
+                 
+    def deplaceD(self):        
+            global lastItem
+            for i in range(self.getRobot()):
+                if self.tabR[i].getId() == lastItem[0]:
+
+                    x =  self.tabR[i].getX()
+                    y =  self.tabR[i].getY()
+                    compteur=self.movePossibleD(x, y)
+                    
+                   ##si compteur n'est pas nul, le robot a bouge
+                    if compteur != 0:
+                        ##Les informations doivent etre actualise:
+                        self.tab[x][y].setRobot( False)
+                        x=x+compteur ##actualise x
+                        self.tab[x][y].setRobot( True )
+                        self.tabR[i].setX(x)
+                        ##modif de l'interface graphique:
+                        print("x = ", x ," et y = ", y)
+                        self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)                
+                 
 
 
 
@@ -253,15 +454,20 @@ class matrice:
 infoRicochet=[2,2,2,2]
 
                 
-tableau=matrice(8,8,4,infoRicochet)
+tableau=matrice(10,10,4,infoRicochet)
 
 #import tkinter.colorchooser
 #couleur= tkinter.colorchooser.askcolor()
 
+##savoir si un robot est déjà selectionné
+selection= False
+
+##permet de connaitre le dernier robot selectionné
+lastItem=0
 
 
 tableau.f.canvas.focus_set()
-tableau.f.canvas.bind("<Button-1>", tableau.clavier)
+tableau.f.canvas.bind("<Button-1>", tableau.clique)
 
 tableau.f.fenetre.mainloop()
 
