@@ -39,7 +39,43 @@ class interface:
 
         return identifiant
 
+    def placeSortie(self,sortie):
+       
+        identifiant = self.canvas.create_rectangle((sortie.getX()*50)+5,(sortie.getY()*50)+5,
+                                (sortie.getX()*50)+45,(sortie.getY()*50)+45,
+                                fill=sortie.getCouleur(), tags="Sortie")
 
+        return identifiant
+
+
+
+
+
+class sortie:
+    def __init__(self, x, y, couleur):
+        self.x=x
+        self.y=y
+        self.couleur=couleur
+        self.Id=0
+
+    ##getter
+    def getX(self):
+        return self.x
+    def getY(self):
+        return self.y
+    def getCouleur(self):
+        return self.couleur
+    def getId(self):
+        return self.Id
+    ##setter
+    def setX(self,a):
+        self.x = a
+    def setY(self,a):
+        self.y = a
+    def setCouleur(self,a):
+        self.couleur =a
+    def setId(self, a):
+        self.Id = a
 
 class robot:
     def __init__(self, x, y,couleur):
@@ -74,13 +110,14 @@ class case:
 
     ##constructeur
     def __init__ (self, haut=False , bas=False, droite=False, gauche=False,
-                  alea=False, robot=False, densite=3):
+                  alea=False, robot=False, sortie = False, densite=3):
 
         self.haut = haut
         self.bas = bas
         self.droite = droite
         self.gauche = gauche
         self.robot = robot
+        self.sortie = sortie
         self.Id = 0
 
 
@@ -104,6 +141,8 @@ class case:
         return self.gauche
     def getRobot(self):
         return self.robot
+    def getSortie(self):
+        return self.sortie
     def getId(self):
         return self.Id
 
@@ -118,6 +157,8 @@ class case:
         self.gauche = x
     def setRobot(self, x):
         self.robot = x
+    def setSortie(self, x):
+        self.sortie = x
     def setId(self, a):
         self.Id = a
 
@@ -161,6 +202,9 @@ class matrice:
         self.colorE = infoRicochet[3]
         #tableau = [[0] * (self.l) for _ in range(self.L)]
         self.tab= []
+        self.tabS = []
+
+        
         self.creerTab()
 
     ##getter
@@ -221,6 +265,7 @@ class matrice:
             #print()
 
         self.initBot()
+        self.initSortie()
         self.creerInterface()
 
 
@@ -235,6 +280,20 @@ class matrice:
                 self.tab[x][y].setRobot(True)
 
                 a=a+1
+
+    def initSortie(self):
+        a=0
+        while a < self.getSortie():
+        
+            x=randint(0,self.L-1)
+            y=randint(0,self.l-1)
+            if(self.tab[x][y].getRobot()==False and self.tab[x][y].getSortie()==False):
+                self.tabS.append(sortie( x, y ,"red"))
+                self.tab[x][y].setSortie(True)
+
+                a=a+1
+
+        
       
 
     def creerInterface(self):
@@ -252,6 +311,13 @@ class matrice:
 
             ##on lie l'Id du cercle au robot
             self.tabR[i].setId(Id)
+
+        for i in range(self.getSortie()):
+            Id=self.f.placeSortie(self.tabS[i])
+            self.tabS[i].setId(Id)
+                
+                
+            
             
 
 
