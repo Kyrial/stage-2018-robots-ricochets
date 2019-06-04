@@ -16,8 +16,6 @@ from Interface import *
 
 
 
-
-
 #####CLASS MATRICE#####
 ##La classe matrice servira à gerer la grille du jeu
 
@@ -303,16 +301,16 @@ class matrice:
                 xmax = x + self.movePossibleD(x, y)
                 if boolean:
                     for y in range(ymin, ymax+1):
-                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="#2e93f9")
+                        self.f.canvas.itemconfigure(self.tab[x][y].getId(),fill="#2e93f9")
                     y =  self.tabR[i].getY()
                     for x in range(xmin, xmax+1):
-                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="#2e93f9")
+                        self.f.canvas.itemconfigure(self.tab[x][y].getId(),fill="#2e93f9")
                 else:
                     for y in range(ymin, ymax+1):
-                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="blue")
+                        self.f.canvas.itemconfigure(self.tab[x][y].getId(),fill="blue")
                     y =  self.tabR[i].getY()
                     for x in range(xmin, xmax+1):
-                        self.f.canvas.itemconfigure(self.tab[y][x].getId(),fill="blue")
+                        self.f.canvas.itemconfigure(self.tab[x][y].getId(),fill="blue")
 
                 
 
@@ -501,7 +499,7 @@ class matrice:
     def genererCouleur(self):
         rouge = format(randint(20,255), '02x')
         vert =  format(randint(20,255), '02x')
-        bleu =  format(randint(0,100), '02x')
+        bleu =  format(randint(0,150), '02x')
         return '#'+ rouge + vert + bleu
 
 
@@ -582,7 +580,7 @@ bouton.grid(column =3, row=9) #, sticky= "c" )
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
 infoRicochet=[2,2,2,2]
                 
-tableau=matrice(10,10,4,infoRicochet)
+tableau=matrice(10,4,4,infoRicochet)
 
 
 

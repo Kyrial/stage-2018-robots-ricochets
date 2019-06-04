@@ -19,7 +19,7 @@ class interface:
             for co in range(0,l):
                 Id= self.canvas.create_rectangle(50*li,50*co,50*li+50,50*co+50,
                                         fill='blue', tags= 'carre')
-                case[co][li].setId(Id)
+                case[li][co].setId(Id)
                 
         
         self.canvas.grid(column =0, row=1, columnspan=2,rowspan = 9)
