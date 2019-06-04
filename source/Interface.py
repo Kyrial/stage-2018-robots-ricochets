@@ -22,7 +22,7 @@ class interface:
                 case[co][li].setId(Id)
                 
         
-        self.canvas.grid(column =0, row=1, columnspan=2)
+        self.canvas.grid(column =0, row=1, columnspan=2,rowspan = 9)
         self.creerLabelNbMove()
 
     def placeMur(self, cases, x, y):
@@ -61,10 +61,73 @@ class interface:
         self.score.grid(column =1, row=0, sticky= "w" )
 
     def labelGagner(self, compteur):
-        self.score.configure(text= str(compteur) + " mouvement, Bravo !")
-        self.phrase.configure(text= " Vous avez gagner en ")
+        self.score.configure(text= str(compteur) + " mouvement, Bravo !    ")
+        self.phrase.configure(text= "           Vous avez gagné en ")
 
 
 
     def afficheMove(self, compteur):
         self.score.configure(text=compteur)
+
+
+    def zoneSelection(self):
+
+        self.creerLabel(1,"Entrez le nombres de Robots")
+        self.creerLabel(3,"Entrez le nombres de \n couleurs de Robots")
+        self.creerLabel(5,"Entrez le nombres de sorties")
+        self.creerLabel(7,"Entrez le nombres de \n couleurs de Robots")
+
+        self.recupInfo = []
+        for i in range(2,9,2):
+            self.recupInfo.append( self.afficheSaisie(i))
+
+    #    bouton=Button(self.fenetre, text="Valider", command=self.resetBouton)
+     #   bouton.grid(column =3, row=9) #, sticky= "c" )
+
+        
+
+    def creerLabel(self,position, texte):
+        Label(self.fenetre, text = texte, font=20).grid(column =3, row=position, sticky= "s" )
+ 
+
+    def afficheSaisie(self,i):        
+        validatecmd = (self.fenetre.register(OnValidate), '%S', '%P')
+        e = Entry(self.fenetre, validate="key", vcmd=validatecmd,width=6)
+        e.grid(column =3, row=i, sticky= "n" )
+        return e
+
+##
+##    def resetBouton(self):
+##        print("reset")
+##        if self.recupInfo[0].get() == "":
+##            print("miaouuuuu")
+##
+##        ##l'encienne grille n'est plus référencer et est donc supprimé automatiquement
+##        from Matrice import reset
+##
+##        reset()
+##        
+
+    
+        
+    
+
+
+
+
+
+
+def OnValidate(S,P):
+    if S.isdigit():
+
+        if P == "" or int(P,10) <= 100:
+            return True
+    return False
+
+
+
+
+
+
+
+

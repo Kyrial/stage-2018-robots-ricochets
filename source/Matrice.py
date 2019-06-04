@@ -8,6 +8,7 @@ from Robot import *
 from Sortie import *
 from Interface import *
 
+
 ##le fichier Matrice fais office de fichier principale, c'est celui
 ##qui sera executé pour lancer l'application.
 
@@ -37,6 +38,7 @@ class matrice:
 
     ##constructeur
     def __init__(self, longueur, largeur, densite, infoRicochet):
+        self.reinitialise()
         self.L = longueur
         self.l = largeur
 
@@ -54,6 +56,14 @@ class matrice:
 
         
         self.creerTab()
+
+    def reinitialise(self):
+        global selection, lastItem, move, gagner, pause
+        selection= False
+        lastItem=0
+        move=0
+        gagner=False
+        pause=False
 
     ##getter
     def getLongueur(self):
@@ -150,7 +160,8 @@ class matrice:
     ##place les sortie sur la grille
     def initSortie(self):
         a=0
-        couleurDiffRestante = self.getCouleurR()
+        couleurDiffRestante = self.getCouleurE()
+        print(self.getCouleurE())
         copieTab = []
         copieTab.extend(self.tabCouleur)
 
@@ -165,7 +176,7 @@ class matrice:
             if(self.tab[x][y].getRobot()==False and self.tab[x][y].getSortie()==False):
 
                 couleur ="red"
-                if couleurDiffRestante > 0 or not copieTab == []:
+                if couleurDiffRestante > 0 and not copieTab == []:
                   
                     
 
@@ -173,7 +184,7 @@ class matrice:
                     couleur=couleur[0]
 
                     copieTab.remove(couleur)
-                    ##on stoque la couleur dans un tableau pour avoir des sortie de meme couleur
+                    ##on stocke la couleur dans un tableau pour avoir des sortie de meme couleur
 
                     couleurDiffRestante=couleurDiffRestante-1
                     
@@ -181,7 +192,8 @@ class matrice:
                     if copieTab==[]:
                         couleur = random.sample(self.tabCouleur,1)
                     else:
-                        couleurUtilise = self.tabCouleur - copieTab
+                        couleurUtilise = set(self.tabCouleur) - set(copieTab)
+
                         couleur = random.sample(couleurUtilise,1)
                         couleur=couleur[0]
 
@@ -196,8 +208,8 @@ class matrice:
     ## Appelle les fonctions nécessaire à l'affichage graphique par rapport
     ## aux données précédemment inscritent dans la grille.
     def creerInterface(self):
-        global fenetre
-        self.f=interface(fenetre)
+        global f
+        self.f=f
         self.f.creerCanvas(self.L,self.l, self.tab)
 
         #on place les murs
@@ -480,7 +492,7 @@ class matrice:
 
                         self.pause()
                         global move
-                        print("vous avez gagner en ",move," coup")
+                        print("     vous avez gagner en ",move," coup     ")
                         self.f.labelGagner(move)
                         gagner = True
                         
@@ -503,23 +515,32 @@ class matrice:
             pause = False
 
             
-        
+
+###fonction d'evenement###        
+
+
+
+
 
 def reset():
-    global selection
-    global lastItem
-    global move
-    global gagner
-        
     print("reset")
-    ##on remet les valeur par default des variabla globales
-    selection= False
-    lastItem=0
-    move=0
-    gagner=False
+    infoRicochet=[]
+    for i in range(len(f.recupInfo)):
+        if f.recupInfo[i].get() == "":
+            infoRicochet.append(2)
+        else:   
+            infoRicochet.append(int(f.recupInfo[i].get()))
+
+    tableau=matrice(10,10,4,infoRicochet)
+
 
     ##l'encienne grille n'est plus référencer et est donc supprimé automatiquement
-    tableau=matrice(10,10,4,infoRicochet)
+    #tableau=matrice(10,10,4,infoRicochet)
+
+    
+
+    
+
 
 
 
@@ -531,9 +552,9 @@ def reset():
 
 
 #la fenetre du programme
-fenetre=Tk()
+f=interface(Tk())
 
-
+#f.afficheSaisie()
 ##savoir si un robot est déjà selectionné
 selection= False
 
@@ -551,6 +572,12 @@ pause=False
 
 #######
 
+##fais apparaitre la zone de selection a droite
+f.zoneSelection()
+##pour eviter bug, bouton de validation séparé
+bouton=Button(f.fenetre, text="Valider", command=reset)
+bouton.grid(column =3, row=9) #, sticky= "c" )
+
 
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
 infoRicochet=[2,2,2,2]
@@ -562,13 +589,13 @@ tableau=matrice(10,10,4,infoRicochet)
 
 
 ### le menu ###
-menubar = Menu(fenetre)
+menubar = Menu(f.fenetre)
 
 menu1 = Menu(menubar, tearoff=0)
 menu1.add_command(label="commencer", command=reset)
 menu1.add_command(label="pause", command=tableau.pause)
 menubar.add_cascade(label="Fichier", menu=menu1)
-fenetre.config(menu=menubar)
+f.fenetre.config(menu=menubar)
 
 
 
@@ -578,4 +605,4 @@ fenetre.config(menu=menubar)
 
 #tableau.f.canvas.bind("<Button-1>", tableau.clique)
 
-#tableau.f.fenetre.mainloop()
+f.fenetre.mainloop()
