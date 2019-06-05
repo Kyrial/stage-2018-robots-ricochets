@@ -35,12 +35,13 @@ class matrice:
     #tableau contenant toute les couleurs utilisé: tabCouleur
 
     ##constructeur
-    def __init__(self, longueur, largeur, densite, infoRicochet):
+    def __init__(self, longueur, largeur, densite, infoRicochet, solvable = False):
         self.reinitialise()
         self.L = longueur
         self.l = largeur
 
         self.densite = densite
+        self.solvable= solvable 
         
         self.bot = infoRicochet[0]
         self.tabR=[]
@@ -120,9 +121,20 @@ class matrice:
                 #print(self.tab[i][j].__dict__)            
             #print()
 
-        self.initBot()
-        self.initSortie()
+
+        if not self.solvable:
+            self.initBot()
+            self.initSortie()
+
+        else:
+            self.initSolvable()
+            self.melangeRobot(5)
+            
         self.creerInterface()
+            
+
+        
+            
 
 
     ##place les robots sur la grille
@@ -160,8 +172,16 @@ class matrice:
         a=0
         couleurDiffRestante = self.getCouleurE()
         print(self.getCouleurE())
+        #copieTab: permet la certitude de tirer une couleur differente
         copieTab = []
         copieTab.extend(self.tabCouleur)
+
+        #si couleur < nbe robot besoin de l'occurance pour des couleur des robots
+        #pour correspondre aux mieux aux couleurs des sorties
+        tabOccC = []
+        for i in range(self.getRobot()):
+            tabOccC.append(self.tabR[i].getCouleur())
+
 
         
         while a < self.getSortie():
@@ -177,29 +197,148 @@ class matrice:
                 if couleurDiffRestante > 0 and not copieTab == []:
                   
                     
-
+                    
                     couleur = random.sample(copieTab, 1)
                     couleur=couleur[0]
 
+                    tabOccC.remove(couleur)
                     copieTab.remove(couleur)
                     ##on stocke la couleur dans un tableau pour avoir des sortie de meme couleur
 
                     couleurDiffRestante=couleurDiffRestante-1
                     
                 else:
-                    if copieTab==[]:
-                        couleur = random.sample(self.tabCouleur,1)
+
+                    if tabOccC == []:
+                        couleurUtilise = set(self.tabCouleur)
+                        couleur = random.sample(self.tabCouleur,1)                        
+
+                    
+                    elif copieTab==[]:
+                        couleurUtilise = set(tabOccC)
+                        couleur = random.sample(couleurUtilise,1)
+                        tabOccC.remove(couleur[0])
                     else:
-                        couleurUtilise = set(self.tabCouleur) - set(copieTab)
+                        couleurUtilise = set(tabOccC) - set(copieTab)
 
                         couleur = random.sample(couleurUtilise,1)
-                        couleur=couleur[0]
+                        tabOccC.remove(couleur[0])
+
+
+                    
+                        
+                    couleur=couleur[0]
 
 
                 self.tabS.append(sortie( x, y ,couleur))
                 self.tab[x][y].setSortie(True)
 
                 a=a+1
+
+
+
+    def initSolvable(self):
+        #pour les grille solvable, on suppose qu'il y a autant de robot que de sortie
+        #et les occurance de couleur sont identique pour les robot et les sortie.
+        #on actualise donc les information pour que cela concorde
+        self.exit =  self.bot   
+        self.colorE = self.colorR
+                           
+                           
+        a=0
+        couleur = "red"
+        #pour le nombre de couleur differente a utiliser
+        couleurDiffRestante = self.getCouleurR()
+        while a < self.getRobot():
+        
+            x=randint(0,self.L-1)
+            y=randint(0,self.l-1)
+            ##si la case est libre, on place le robot
+            ##et la case prend le statue "occuper"
+
+
+            if(self.tab[x][y].getRobot()==False):
+                if couleurDiffRestante > 0:
+                    
+                    couleur = self.genererCouleur()
+                    couleurDiffRestante=couleurDiffRestante-1
+                    self.tabCouleur.append(couleur)
+                else:
+                    couleur = random.sample(self.tabCouleur, 1)
+                    couleur=couleur[0]
+
+                
+                self.tabR.append(robot(x, y ,couleur))
+                self.tab[x][y].setRobot(True)
+
+                self.tabS.append(sortie( x, y ,couleur))
+                self.tab[x][y].setSortie(True)
+
+                a=a+1
+
+    def melangeRobot(self, n):
+        print(n)
+
+        aucuneSolution= False
+
+        compteur=0
+
+        tabDernierMove = [""]*len(self.tabR)
+        
+        
+        while compteur < n and not aucuneSolution:
+
+            print(self.MoveParRobot(tabDernierMove))
+
+            ##a faire: piocher l'un des true, déplacer
+            
+            print(compteur)
+
+            
+            compteur=compteur+1
+
+
+        if aucuneSolution:
+            self.creerTab()
+        
+    #########
+
+    def MoveParRobot(self,tabDernierMove):
+        tabRobotMove= [""]*len(self.tabR)
+        
+        for i in range(len(self.tabR)):
+            x= self.tabR[i].getX()
+            y= self.tabR[i].getY()
+
+            compteur=0
+
+            directionAccessible= [""]*4
+            
+            if self.movePossibleH(x,y)>0 and tabDernierMove != "haut":
+                compteur=compteur+1
+                directionAccessible[0]=True
+                
+            if self.movePossibleB(x,y)>0 and tabDernierMove != "bas":
+                compteur=compteur+1
+                directionAccessible[1]=True
+            if self.movePossibleG(x,y)>0 and tabDernierMove != "gauche":
+                compteur=compteur+1
+                directionAccessible[2]=True
+            if self.movePossibleD(x,y)>0 and tabDernierMove != "droite":
+                compteur=compteur+1
+                directionAccessible[3]=True
+
+            if compteur==0:
+                tabRobotMove[i]= False
+            else:
+                tabRobotMove[i]= directionAccessible
+                
+        return tabRobotMove
+                       
+                       
+
+
+
 
         
       
@@ -522,21 +661,31 @@ class matrice:
 
 def reset():
     print("reset")
+    print(f.resolve.get())
     infoRicochet=[]
     for i in range(len(f.recupInfo)):
         if f.recupInfo[i].get() == "":
             infoRicochet.append(2)
         else:   
             infoRicochet.append(int(f.recupInfo[i].get()))
-
-    tableau=matrice(10,10,4,infoRicochet)
+    if f.resolve.get()==1:
+        tableau=matrice(10,10,37,infoRicochet, True)
+    else:
+        tableau=matrice(10,10,37,infoRicochet)
 
 
     ##l'encienne grille n'est plus référencer et est donc supprimé automatiquement
     #tableau=matrice(10,10,4,infoRicochet)
 
     
+def bouton():
+    bouton=Button(f.fenetre, text="Valider", command=reset)
+    bouton.grid(column =4, row=9) #, sticky= "c" )
+    
+    
 
+    
+    
     
 
 
@@ -547,6 +696,8 @@ def reset():
 #couleur= tkinter.colorchooser.askcolor()
 
 ######
+
+
 
 
 #la fenetre du programme
@@ -573,14 +724,14 @@ pause=False
 ##fais apparaitre la zone de selection a droite
 f.zoneSelection()
 ##pour eviter bug, bouton de validation séparé
-bouton=Button(f.fenetre, text="Valider", command=reset)
-bouton.grid(column =3, row=9) #, sticky= "c" )
+bouton()
+
 
 
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
 infoRicochet=[2,2,2,2]
                 
-tableau=matrice(10,4,4,infoRicochet)
+tableau=matrice(10,10,40,infoRicochet, solvable = True)
 
 
 
@@ -604,3 +755,5 @@ f.fenetre.config(menu=menubar)
 #tableau.f.canvas.bind("<Button-1>", tableau.clique)
 
 f.fenetre.mainloop()
+
+

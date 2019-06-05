@@ -20,8 +20,8 @@ class case:
         #gère un ou plusieur mur suivant l'aléatoire
       
         if alea:
-            while densite >1:
-                if randint(0,10) < densite:
+            while densite >10:
+                if randint(0,100) < densite:
                     self.ajoutAleatMur()
                 densite=densite/2-1
 

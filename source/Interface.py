@@ -84,16 +84,20 @@ class interface:
     #    bouton=Button(self.fenetre, text="Valider", command=self.resetBouton)
      #   bouton.grid(column =3, row=9) #, sticky= "c" )
 
+        ##variable de controle
+        self.resolve= IntVar()
+        Checkbutton(self.fenetre, text="resolvable",variable=self.resolve, onvalue=1, offvalue=0).grid(column =3, row=9)
+
         
 
     def creerLabel(self,position, texte):
-        Label(self.fenetre, text = texte, font=20).grid(column =3, row=position, sticky= "s" )
+        Label(self.fenetre, text = texte, font=20).grid(column =3,columnspan = 2, row=position, sticky= "s" )
  
 
     def afficheSaisie(self,i):        
         validatecmd = (self.fenetre.register(OnValidate), '%S', '%P')
         e = Entry(self.fenetre, validate="key", vcmd=validatecmd,width=6)
-        e.grid(column =3, row=i, sticky= "n" )
+        e.grid(column =3, row=i,columnspan = 2, sticky= "n" )
         return e
 
 ##
