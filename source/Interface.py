@@ -61,6 +61,9 @@ class interface:
         self.score.grid(column =1, row=0, sticky= "w" )
 
     def labelGagner(self, compteur):
+        ##probleme de dexture si on modifie seulement le Label
+        
+        
         self.score.configure(text= str(compteur) + " mouvement, Bravo !    ")
         self.phrase.configure(text= "           Vous avez gagné en ")
 

@@ -59,7 +59,7 @@ class matrice:
     def reinitialise(self):
         global selection, lastItem, move, gagner, pause
         selection= False
-        lastItem=0
+        lastItem=[0]
         move=0
         gagner=False
         pause=False
@@ -125,12 +125,14 @@ class matrice:
         if not self.solvable:
             self.initBot()
             self.initSortie()
+            self.creerInterface()
 
         else:
             self.initSolvable()
-            self.melangeRobot(5)
+            self.creerInterface()
+            self.melangeRobot(10)
             
-        self.creerInterface()
+        #self.creerInterface()
             
 
         
@@ -241,9 +243,11 @@ class matrice:
         #pour les grille solvable, on suppose qu'il y a autant de robot que de sortie
         #et les occurance de couleur sont identique pour les robot et les sortie.
         #on actualise donc les information pour que cela concorde
-        self.exit =  self.bot   
+        self.exit =  0 
         self.colorE = self.colorR
-                           
+
+        self.tabPositionInitiale= []
+
                            
         a=0
         couleur = "red"
@@ -253,11 +257,16 @@ class matrice:
         
             x=randint(0,self.L-1)
             y=randint(0,self.l-1)
-            ##si la case est libre, on place le robot
-            ##et la case prend le statue "occuper"
 
+            ##condition requise:            
+            ##-si la case est libre, on place le robot
+            ##    et la case prend le statue "occuper"
+            ##- on s'assure qu'au moins un mouvement est possible
 
-            if(self.tab[x][y].getRobot()==False):
+            if(self.tab[x][y].getRobot()==False and ( self.movePossibleH(x,y) or
+                                                      self.movePossibleB(x,y) or
+                                                      self.movePossibleG(x,y) or
+                                                      self.movePossibleD(x,y) )):
                 if couleurDiffRestante > 0:
                     
                     couleur = self.genererCouleur()
@@ -270,41 +279,95 @@ class matrice:
                 
                 self.tabR.append(robot(x, y ,couleur))
                 self.tab[x][y].setRobot(True)
+                self.tabPositionInitiale.append(robot(x, y ,couleur))
 
-                self.tabS.append(sortie( x, y ,couleur))
-                self.tab[x][y].setSortie(True)
+                #self.tabS.append(sortie( x, y ,couleur))
+                #self.tab[x][y].setSortie(True)
 
                 a=a+1
 
     def melangeRobot(self, n):
-        print(n)
+
+        global lastItem
 
         aucuneSolution= False
 
         compteur=0
 
-        tabDernierMove = [""]*len(self.tabR)
+        tabDernierMove = ["first"]*len(self.tabR)
         
         
         while compteur < n and not aucuneSolution:
+            
 
-            print(self.MoveParRobot(tabDernierMove))
+            tabRobotMove=self.MoveParRobot(tabDernierMove)
+            print(tabRobotMove)
+            if tabRobotMove == []:
+                aucuneSolution = True
+            else:
+                
+                direction = random.sample(tabRobotMove,1)
 
-            ##a faire: piocher l'un des true, déplacer
+                #random.sample renvois une liste, nous avons donc une liste de liste ici
+                #un supprime donc la liste inutile
+                direction= direction[0]
+
+                ##on enlève l'identifiant pour ne pas le tirer au sort ensuite
+                
+                print(direction)
+
+                
+
+                lastItem[0] = self.tabR[direction[0]].getId()
+                
+                numeroR= direction[0]
+
+
+                del direction[0]
+
+
+
+                trajectoire = random.sample(direction, 1)
+
+                if trajectoire[0] == "haut":
+                    self.deplaceH()
+                    tabDernierMove[numeroR] = "haut"
+
+                if trajectoire[0] == "bas":
+                    self.deplaceB()
+                    tabDernierMove[numeroR] = "bas"
+
+                if trajectoire[0] == "gauche":
+                    self.deplaceG()
+                    tabDernierMove[numeroR] = "gauche"
+
+
+                if trajectoire[0] == "droite":
+                    self.deplaceD()
+                    tabDernierMove[numeroR] = "droite"
             
             print(compteur)
 
             
             compteur=compteur+1
+            print("\n", tabDernierMove,"\n")
 
 
         if aucuneSolution:
+            #on réinitialise les tableau
+            self.tabR=[]       
+            self.tab= []
+            self.tabS = []
+            self.tabCouleur = []
+
             self.creerTab()
+        else:
+            self.finaliseSolvable()
         
     #########
 
     def MoveParRobot(self,tabDernierMove):
-        tabRobotMove= [""]*len(self.tabR)
+        tabRobotMove=[]
         
         for i in range(len(self.tabR)):
             x= self.tabR[i].getX()
@@ -312,31 +375,110 @@ class matrice:
 
             compteur=0
 
-            directionAccessible= [""]*4
+            directionAccessible= []
             
-            if self.movePossibleH(x,y)>0 and tabDernierMove != "haut":
-                compteur=compteur+1
-                directionAccessible[0]=True
-                
-            if self.movePossibleB(x,y)>0 and tabDernierMove != "bas":
-                compteur=compteur+1
-                directionAccessible[1]=True
-            if self.movePossibleG(x,y)>0 and tabDernierMove != "gauche":
-                compteur=compteur+1
-                directionAccessible[2]=True
-            if self.movePossibleD(x,y)>0 and tabDernierMove != "droite":
-                compteur=compteur+1
-                directionAccessible[3]=True
+            directionAccessible.append( i )
 
-            if compteur==0:
-                tabRobotMove[i]= False
-            else:
-                tabRobotMove[i]= directionAccessible
+
+            ##condition requise:
+            # -direction non obstrué
+            # -le denier mouvement n'est pas la direction contraire(pour ne par retourner
+            #     sur ses pas
+            # - la direction contraire doit etre un mur (pour qu'on puisse faire le
+            #     le chemin dans l'autre sens.
+
+            
+            if (self.movePossibleH(x,y)>0 and tabDernierMove[i] != "bas"):
+                #and self.movePossibleB(x,y) ==0 ):
+                
+                compteur=compteur+1
+                directionAccessible.append("haut")
+                
+                    
+            if (self.movePossibleB(x,y)>0 and tabDernierMove[i] != "haut"):
+                #and self.movePossibleH(x,y) ==0 ):
+
+                compteur=compteur+1
+                directionAccessible.append("bas")
+                
+            if (self.movePossibleG(x,y)>0 and tabDernierMove[i] != "droite"):
+                #and self.movePossibleD(x,y) ==0 ):
+
+                compteur=compteur+1
+                directionAccessible.append("gauche")
+
+            if (self.movePossibleD(x,y)>0 and tabDernierMove[i] != "gauche"):
+                #and self.movePossibleG(x,y) ==0 ):
+
+                compteur=compteur+1
+                directionAccessible.append("droite")
+
+
+
+            if compteur != 0:
+
+                tabRobotMove.append(directionAccessible)
+                
+
+
                 
         return tabRobotMove
+    
+
+
                        
                        
 
+    def finaliseSolvable(self):
+        
+        self.exit =  self.bot
+
+        #on place les sorties avant de modifier les robots pour qu'elles
+        #apparaissent au 2ieme plan
+        for i in range (self.exit):
+            x= self.tabR[i].getX()
+            y= self.tabR[i].getY()
+
+            self.tabS.append(sortie( x, y ,self.tabR[i].getCouleur()))
+
+            self.tab[x][y].setSortie(True)
+
+            self.tab[x][y].setRobot(False)
+            
+            #on place la sortie    
+            Id=self.f.placeSortie(self.tabS[i])
+            self.tabS[i].setId(Id)
+
+        
+        
+        for i in range(len(self.tabR)):
+            #print(len(self.tabPositionInitiale))
+            y=self.tabPositionInitiale[i].getY()
+            x=self.tabPositionInitiale[i].getX()
+            self.tabR[i].setY(y)
+            self.tabR[i].setX(x)
+            self.tab[x][y].setRobot( True )
+                    
+            ##modif de l'interface graphique:
+            #print("x = ", x ," et y = ", y)
+            self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)
+
+            #on place le robot au premier plan pour éviter d'etre "cache" par la sortie
+            self.f.canvas.tag_raise(self.tabR[i].getId())            
+  
+
+
+        for i in range(len(self.tabR)):
+            print(self.tabR[i].getX(), " et ",self.tabR[i].getY() )
+            
+
+        del self.tabPositionInitiale
+
+        global move
+        move=0
+        self.f.afficheMove(move)
+                
+                
 
 
 
@@ -627,7 +769,7 @@ class matrice:
                     
                     if self.tabR[i].getCouleur() == self.tabS[j].getCouleur():
 
-                        self.pause()
+                        #self.pause()
                         global move
                         print("     vous avez gagner en ",move," coup     ")
                         self.f.labelGagner(move)
@@ -708,7 +850,7 @@ f=interface(Tk())
 selection= False
 
 ##permet de connaitre le dernier robot selectionné
-lastItem=0
+lastItem =[0]
 
 ##compteur de mouvement
 move=0
