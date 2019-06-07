@@ -35,13 +35,14 @@ class matrice:
     #tableau contenant toute les couleurs utilisé: tabCouleur
 
     ##constructeur
-    def __init__(self, longueur, largeur, densite, infoRicochet, solvable = False):
+    def __init__(self, longueur, largeur, densite, infoRicochet, solvable = False,mouvement=10):
         self.reinitialise()
         self.L = longueur
         self.l = largeur
 
         self.densite = densite
-        self.solvable= solvable 
+        self.solvable= solvable
+        self.mouvement=mouvement
         
         self.bot = infoRicochet[0]
         self.tabR=[]
@@ -130,7 +131,7 @@ class matrice:
         else:
             self.initSolvable()
             self.creerInterface()
-            self.melangeRobot(10)
+            self.melangeRobot(self.mouvement)
             
         #self.creerInterface()
             
@@ -461,7 +462,8 @@ class matrice:
                     
             ##modif de l'interface graphique:
             #print("x = ", x ," et y = ", y)
-            self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)
+            self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
+                                 x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))
 
             #on place le robot au premier plan pour éviter d'etre "cache" par la sortie
             self.f.canvas.tag_raise(self.tabR[i].getId())            
@@ -665,7 +667,8 @@ class matrice:
                     self.tabR[i].setY(y)
                     ##modif de l'interface graphique:
                     print("x = ", x ," et y = ", y)
-                    self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)
+                    self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
+                                 x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))
 
                     ##on verifie si une sortie a été atteinte
                     self.verifSortie(i,x,y)     
@@ -692,7 +695,8 @@ class matrice:
                     self.tabR[i].setY(y)
                     ##modif de l'interface graphique:
                     print("x = ", x ," et y = ", y)
-                    self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)                
+                    self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
+                                 x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))                
 
                     ##on verifie si une sortie a été atteinte
                     self.verifSortie(i,x,y)     
@@ -720,7 +724,8 @@ class matrice:
                     self.tabR[i].setX(x)
                     ##modif de l'interface graphique:
                     print("x = ", x ," et y = ", y)
-                    self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)                
+                    self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
+                                 x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))               
 
                     ##on verifie si une sortie a été atteinte
                     self.verifSortie(i,x,y)     
@@ -749,7 +754,8 @@ class matrice:
                     self.tabR[i].setX(x)
                     ##modif de l'interface graphique:
                     print("x = ", x ," et y = ", y)
-                    self.f.canvas.coords(self.tabR[i].getId(),x*50+5,y*50+5,x*50+45,y*50+45)                
+                    self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
+                                 x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))               
 
                     ##on verifie si une sortie a été atteinte
                     self.verifSortie(i,x,y)           
@@ -805,13 +811,20 @@ def reset():
     print("reset")
     print(f.resolve.get())
     infoRicochet=[]
-    for i in range(len(f.recupInfo)):
+    for i in range(len(f.recupInfo)-1):
         if f.recupInfo[i].get() == "":
             infoRicochet.append(2)
         else:   
             infoRicochet.append(int(f.recupInfo[i].get()))
+    
+    
     if f.resolve.get()==1:
-        tableau=matrice(10,10,37,infoRicochet, True)
+        ##récup le dernier élémet de la liste
+        if f.recupInfo[-1].get() != "":
+            tableau=matrice(10,10,37,infoRicochet, True,int(f.recupInfo[-1].get()))
+
+        else:
+            tableau=matrice(10,10,37,infoRicochet, True)
     else:
         tableau=matrice(10,10,37,infoRicochet)
 
@@ -822,7 +835,7 @@ def reset():
     
 def bouton():
     bouton=Button(f.fenetre, text="Valider", command=reset)
-    bouton.grid(column =4, row=9) #, sticky= "c" )
+    bouton.grid(column =4,rowspan=3, row=9) #, sticky= "c" )
     
     
 
@@ -873,7 +886,7 @@ bouton()
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
 infoRicochet=[2,2,2,2]
                 
-tableau=matrice(10,10,40,infoRicochet, solvable = True)
+tableau=matrice(20,20,40,infoRicochet, solvable = True)
 
 
 

@@ -11,34 +11,37 @@ class interface:
 
 
     def creerCanvas(self, L, l, case):
-        self.canvas = Canvas(self.fenetre, width=L*50+50, height=l*50+50,
+        self.canvas = Canvas(self.fenetre,  width=600, height=600,
                              borderwidth=5,background="white")
-        self.canvas['scrollregion'] = (-25,-25,L*50+25,l*50+25)
+        self.canvas['scrollregion'] = (-25,-25,575,575)
+
+        self.tailleCase= (550/max(L,l))
 
         for li in range(0,L):
             for co in range(0,l):
-                Id= self.canvas.create_rectangle(50*li,50*co,50*li+50,50*co+50,
+                Id= self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
+                                                 (li+1)*self.tailleCase,(co+1)*self.tailleCase,
                                         fill='blue', tags= 'carre')
                 case[li][co].setId(Id)
                 
         
-        self.canvas.grid(column =0, row=1, columnspan=2,rowspan = 9)
+        self.canvas.grid(column =0, row=1, columnspan=2,rowspan = 11)
         self.creerLabelNbMove()
 
     def placeMur(self, cases, x, y):
         if cases.getHaut():
-            self.canvas.create_line(x*50   , y*50   , x*50+50 , y*50, width=5)
+            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , (x+1)*self.tailleCase , y*self.tailleCase, width=5)
         if cases.getBas():
-            self.canvas.create_line(x*50   , y*50+50, x*50+50 , y*50+50, width=5)
+            self.canvas.create_line(x*self.tailleCase   , (y+1)*self.tailleCase, (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=5)
         if cases.getDroite():
-            self.canvas.create_line(x*50+50, y*50   , x*50+50 , y*50+50, width=5)
+            self.canvas.create_line((x+1)*self.tailleCase, y*self.tailleCase   , (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=5)
         if cases.getGauche():
-            self.canvas.create_line(x*50   , y*50   , x*50    , y*50+50, width=5)
+            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , x*self.tailleCase    , (y+1)*self.tailleCase, width=5)
 
     def placeRobot(self,robot):
        
-        identifiant = self.canvas.create_oval((robot.getX()*50)+5,(robot.getY()*50)+5,
-                                (robot.getX()*50)+45,(robot.getY()*50)+45,
+        identifiant = self.canvas.create_oval(robot.getX()*self.tailleCase+(self.tailleCase/10),(robot.getY()*self.tailleCase)+(self.tailleCase/10),
+                                (robot.getX()*self.tailleCase)+(self.tailleCase/10*9),(robot.getY()*self.tailleCase)+(self.tailleCase/10*9),
                                 fill=robot.getCouleur(), tags="robot")
         self.canvas.tag_raise(identifiant)
 
@@ -46,8 +49,8 @@ class interface:
 
     def placeSortie(self,sortie):
        
-        identifiant = self.canvas.create_rectangle((sortie.getX()*50)+5,(sortie.getY()*50)+5,
-                                (sortie.getX()*50)+45,(sortie.getY()*50)+45,
+        identifiant = self.canvas.create_rectangle((sortie.getX()*self.tailleCase+(self.tailleCase/10)),(sortie.getY()*self.tailleCase+(self.tailleCase/10)),
+                                (sortie.getX()*self.tailleCase+(self.tailleCase/10*9)),(sortie.getY()*self.tailleCase+(self.tailleCase/10*9)),
                                 fill=sortie.getCouleur(), tags="Sortie")
 
         return identifiant
@@ -79,28 +82,29 @@ class interface:
         self.creerLabel(3,"Entrez le nombres de \n couleurs de Robots")
         self.creerLabel(5,"Entrez le nombres de sorties")
         self.creerLabel(7,"Entrez le nombres de \n couleurs de Robots")
+        self.creerLabel(10,"si resolvable, \n en combien de coup",1)
 
         self.recupInfo = []
         for i in range(2,9,2):
             self.recupInfo.append( self.afficheSaisie(i))
+        self.recupInfo.append( self.afficheSaisie(11,colonnespan=1))
 
-    #    bouton=Button(self.fenetre, text="Valider", command=self.resetBouton)
-     #   bouton.grid(column =3, row=9) #, sticky= "c" )
+
 
         ##variable de controle
         self.resolve= IntVar()
-        Checkbutton(self.fenetre, text="resolvable",variable=self.resolve, onvalue=1, offvalue=0).grid(column =3, row=9)
+        Checkbutton(self.fenetre, text="resolvable",variable=self.resolve, onvalue=1, offvalue=0).grid(column =3, row=9,sticky= "s")
 
         
 
-    def creerLabel(self,position, texte):
-        Label(self.fenetre, text = texte, font=20).grid(column =3,columnspan = 2, row=position, sticky= "s" )
+    def creerLabel(self, ligne, texte,colonnespan = 2):
+        Label(self.fenetre, text = texte, font=20).grid(column =3,columnspan = colonnespan, row=ligne, sticky= "s" )
  
 
-    def afficheSaisie(self,i):        
+    def afficheSaisie(self,ligne,colonnespan=2):        
         validatecmd = (self.fenetre.register(OnValidate), '%S', '%P')
         e = Entry(self.fenetre, validate="key", vcmd=validatecmd,width=6)
-        e.grid(column =3, row=i,columnspan = 2, sticky= "n" )
+        e.grid(column =3, row=ligne,columnspan = colonnespan, sticky= "n" )
         return e
 
 ##
@@ -116,11 +120,6 @@ class interface:
 ##        
 
     
-        
-    
-
-
-
 
 
 
