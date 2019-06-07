@@ -6,7 +6,7 @@ class case:
 
     ##constructeur
     def __init__ (self, haut=False , bas=False, droite=False, gauche=False,
-                  alea=False, robot=False, sortie = False, densite=3):
+                  alea=False, robot=False, sortie = False, densite=30):
 
         self.haut = haut
         self.bas = bas

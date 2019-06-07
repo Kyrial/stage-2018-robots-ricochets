@@ -1,6 +1,7 @@
 from tkinter import *
 import random
 
+import Plateau
 
 #on importe les autres classes: case, robot, sortie, interface
 from Case import *
@@ -842,10 +843,6 @@ def bouton():
     
     
     
-
-
-
-
 
 #import tkinter.colorchooser
 #couleur= tkinter.colorchooser.askcolor()
