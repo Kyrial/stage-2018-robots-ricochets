@@ -1,6 +1,6 @@
 from tkinter import *
 import random
-
+from math import *
 
 #####CLASS INTERFACE#####
 
@@ -23,7 +23,7 @@ class interface:
                 if case[li][co] == 0:
                     self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
                                                  (li+1)*self.tailleCase,(co+1)*self.tailleCase,
-                                        fill='#2c2c2c', tags= 'exterieur')
+                                        fill='#2c2c2c',outline='#2c2c2c', tags= 'exterieur')
                 else:                    
                     Id= self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
                                                  (li+1)*self.tailleCase,(co+1)*self.tailleCase,
@@ -36,13 +36,13 @@ class interface:
 
     def placeMur(self, cases, x, y):
         if cases.getHaut():
-            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , (x+1)*self.tailleCase , y*self.tailleCase, width=5)
+            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , (x+1)*self.tailleCase , y*self.tailleCase, width=6-log(5*self.tailleCase,10))
         if cases.getBas():
-            self.canvas.create_line(x*self.tailleCase   , (y+1)*self.tailleCase, (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=5)
+            self.canvas.create_line(x*self.tailleCase   , (y+1)*self.tailleCase, (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=6-log(5*self.tailleCase,10))
         if cases.getDroite():
-            self.canvas.create_line((x+1)*self.tailleCase, y*self.tailleCase   , (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=5)
+            self.canvas.create_line((x+1)*self.tailleCase, y*self.tailleCase   , (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=6-log(5*self.tailleCase,10))
         if cases.getGauche():
-            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , x*self.tailleCase    , (y+1)*self.tailleCase, width=5)
+            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , x*self.tailleCase    , (y+1)*self.tailleCase, width=6-log(5*self.tailleCase,10))
 
     def placeRobot(self,robot):
        
