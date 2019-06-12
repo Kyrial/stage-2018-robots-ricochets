@@ -19,10 +19,16 @@ class interface:
 
         for li in range(0,L):
             for co in range(0,l):
-                Id= self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
+
+                if case[li][co] == 0:
+                    self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
+                                                 (li+1)*self.tailleCase,(co+1)*self.tailleCase,
+                                        fill='#2c2c2c', tags= 'exterieur')
+                else:                    
+                    Id= self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
                                                  (li+1)*self.tailleCase,(co+1)*self.tailleCase,
                                         fill='blue', tags= 'carre')
-                case[li][co].setId(Id)
+                    case[li][co].setId(Id)
                 
         
         self.canvas.grid(column =0, row=1, columnspan=2,rowspan = 11)

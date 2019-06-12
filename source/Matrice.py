@@ -1,7 +1,7 @@
 from tkinter import *
 import random
 
-import Plateau
+#import Plateau
 
 #on importe les autres classes: case, robot, sortie, interface
 from Case import *

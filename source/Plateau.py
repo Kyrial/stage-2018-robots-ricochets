@@ -1,74 +1,151 @@
 #fichier qui contient les fonction pour personnalisé le plateau du jeu
 #(par exemple: les disptcher etc...
 from tkinter import *
+from math import*
+
 from Case import *
 
 from Interface import *
 
 
+def copieTab(grille, extrait, x, y ):
+    for i in range(len(extrait)):
+        for j in range(len(extrait[0])):
+            grille[x+i][y+j]=extrait[i][j]
+
+
+
+
 def dispatcher(nbSortie):
+    global a
 
-    hauteur=nbSortie*4+3
-    largeur= nbSortie + (2*(nbSortie-1))+1
+    hauteur=floor(log(nbSortie,2))*4+7
+    largeur=(3*nbSortie)
 
 
 
 
-    grille=[[0] * largeur for i in range(hauteur)]
-    print(grille)
+    grille=[[0] * hauteur for i in range(largeur)]
+    #print(grille)
 
 
     
     
     
-    ligne= [[ case(gauche=True, droite=True), case(gauche=True, bas=True),case(),case(),case(),case()],
-    [ case(),case(haut=True, droite=True) ,case(gauche=True, droite=True),case(gauche=True, droite=True),
-      case(gauche=True, droite=True),case(gauche=True, droite=True) ]]
+    ligne= [[ case(gauche=True, droite=True), case(gauche=True, bas=True),0,0,0,0,0],
+    [ 0,case(haut=True, droite=True) ,case(gauche=True, droite=True),case(gauche=True, droite=True),
+      case(gauche=True, droite=True),case(gauche=True, droite=True),case(gauche=True, droite=True) ]]
 
     print(ligne[0][0].__dict__)
     
-    #return ligne
+    
 
 
 
     ligneH = [[ case(gauche=True, droite=True),case(gauche=True, droite=True),case(gauche=True, droite=True)
-                ,case(gauche=True),case(gauche=True, droite=True),case(gauche=True, droite=True,bas=True)],
-              [case(),case(),case(),case(haut=True,bas=True),case(),case()],
-              [case(),case(),case(),case(haut=True),case(gauche=True, droite=True),case(gauche=True, droite=True)],
-              [case(gauche=True, droite=True), case(gauche=True, bas=True),case(),
-               case(haut=True,bas=True),case(),case()],
-              [ case(),case(haut=True, droite=True) ,case(gauche=True, droite=True),case( droite=True),
-                case(gauche=True, droite=True),case(gauche=True, droite=True, bas = True) ]]
+                ,case(gauche=True),case(gauche=True, droite=True),case(gauche=True, droite=True,bas=True),0],
+              [0,0,0,case(haut=True,bas=True),0,0,0],
+              [0,0,0,case(haut=True),case(gauche=True, droite=True),case(gauche=True, droite=True),case(gauche=True, droite=True)],
+              [case(gauche=True, droite=True), case(gauche=True, bas=True),0,
+               case(haut=True,bas=True),0,0,0],
+              [ 0,case(haut=True, droite=True) ,case(gauche=True, droite=True),case( droite=True),
+                case(gauche=True, droite=True),case(gauche=True, droite=True, bas = True),0 ],
+              [0,0,0,0,0,0,0]]
+              
 
-    return ligneH
+   #return ligneH
+
+    compteur = 0
+    while compteur < nbSortie:
+        if compteur <=nbSortie-2:
+            copieTab(grille, ligneH, compteur*3, 0)
+            compteur = compteur +2
+        else:
+            copieTab(grille, ligne, (compteur)*3, 0)
+            compteur = compteur +1
+
+    
+    ##on doit maintenant relier les sorties
+    x=2
+    for y in range(7,hauteur, 4):
+        #distance= 2*x+1
+        #incremente = x
+        #comme do while n'existe pas en python:
+        #while True:
+        
+            incremente = x
+            distance= 2*x+1
+          
+            grille[incremente][y]=case(gauche=True)
+            grille[incremente][y+1]=case(gauche=True,droite = True)
+            grille[incremente][y+2]=case(gauche=True, droite = True, bas = True)
+ 
+            for trace in range (incremente+1, min((distance)+incremente+1, largeur-2)):
+                if trace == min( largeur-2, distance):
+                    grille[trace][y]=case(haut=True)
+                    grille[trace][y+1]=case(gauche=True,droite = True)
+                    grille[trace][y+2]=case(gauche=True, droite = True)
+                    grille[trace][y+3]=case(gauche=True, droite = True)
+
+                else:
+                    grille[trace][y]=case(haut=True, bas = True)
+
+            
+            grille[min(distance+x+1, largeur-2)][y]=case(droite=True)
+            grille[min(distance+x+1, largeur-2)][y+1]=case(gauche=True,droite = True)
+            grille[min(distance+x+1, largeur-2)][y+2]=case(gauche=True, droite = True, bas = True)
+            
+            x=2*x+1
+
+            #if incremente+distance >= largeur:
+                #break
+
+    
 
 
 
 
-    #for i in range(6,hauteur,4):
-     #   j= 1
-      ##  while j < largeur:
-        #    while(
+
+    #print(grille)
 
 
-x = dispatcher(2)
+    a.creerCanvas(largeur,hauteur,grille)
+    
+    #on place les murs
+    for i in range(largeur):
+        for j in range(hauteur):
+            if grille[i][j] != 0:
+                a.placeMur(grille[i][j],i,j)
 
-print(x)
+
+
+
+
+
+
+
+print(floor(log(6,2)))
 
 a=interface(Tk())
+x = dispatcher(12)
 
-a.creerCanvas(5,6,x)
+#print(x)
 
 
 
-print(x[0][0].__dict__)
+#a.creerCanvas(6,7,x)
+
+
+
+#print(x[0][0].__dict__)
 
 
 
 #on place les murs
-for i in range((5) ):
-    for j in range(6):
-        a.placeMur(x[i][j],i,j)
+#for i in range((6) ):
+ #   for j in range(7):
+  #      if x[i][j] != 0:
+   #         a.placeMur(x[i][j],i,j)
 
 
 
