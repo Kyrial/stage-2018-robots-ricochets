@@ -20,10 +20,15 @@ class case:
         #gère un ou plusieur mur suivant l'aléatoire
       
         if alea:
-            while densite >10:
+            nbMur = 2
+            while nbMur > 0:
+                
                 if randint(0,100) < densite:
                     self.ajoutAleatMur()
-                densite=densite/2-1
+                    nbMur= nbMur-1
+                else:
+                    nbMur = 0
+                
 
 
     ##getter
@@ -60,13 +65,9 @@ class case:
 
     ##genere mur aléatoire
     def ajoutAleatMur(self):
-        alea=randint(1,4)
+        alea=randint(1,2)
         if alea ==1:
-            self.haut = True
-        elif alea ==2:
             self.bas = True
-        elif alea ==3:
+        elif alea ==2:
             self.droite = True
-        elif alea ==4:
-            self.gauche = True
         

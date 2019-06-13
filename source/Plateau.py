@@ -163,7 +163,7 @@ a=interface(Tk())
 
 #x = dispatcher(12)     
 
-dispatch = dispatcher(20)      
+dispatch = dispatcher(10)      
 #x = dispatcher(26)      
 
 #fonctionne tous

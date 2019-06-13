@@ -1,6 +1,8 @@
 from tkinter import *
 import random
 
+import sys, os
+
 #import Plateau
 
 #on importe les autres classes: case, robot, sortie, interface
@@ -36,27 +38,48 @@ class matrice:
     #tableau contenant toute les couleurs utilisé: tabCouleur
 
     ##constructeur
-    def __init__(self, longueur, largeur, densite, infoRicochet, solvable = False,mouvement=10):
-        self.reinitialise()
-        self.L = longueur
-        self.l = largeur
+    def __init__(self, longueur=10, largeur=10, densite=60, infoRicochet=[2,2,2,2],
+                 solvable = False,mouvement=10, fichier= None):
 
-        self.densite = densite
-        self.solvable= solvable
-        self.mouvement=mouvement
-        
-        self.bot = infoRicochet[0]
+        #tableau de robots
         self.tabR=[]
-        
-        self.colorR = infoRicochet[1]
-        self.exit = infoRicochet[2]
-        self.colorE = infoRicochet[3]
+
+        #la matrice
         self.tab= []
+
+        #tableau des sorties
         self.tabS = []
+
+        #tableau des différentes couleur utilisé
         self.tabCouleur = []
 
+        self.reinitialise()
         
-        self.creerTab()
+        if fichier ==None:
+
+            self.L = longueur
+            self.l = largeur
+
+            self.densite = densite
+            self.solvable= solvable
+            self.mouvement=mouvement
+            
+            self.bot = infoRicochet[0]
+
+            
+            self.colorR = infoRicochet[1]
+            self.exit = infoRicochet[2]
+            self.colorE = infoRicochet[3]
+            self.creerTab()
+
+        else:
+            print(fichier)
+            self.fichier = fichier
+            self.creerViaFichier()
+            
+
+        
+     
 
     def reinitialise(self):
         global selection, lastItem, move, gagner, pause
@@ -95,6 +118,64 @@ class matrice:
         self.exit=x
     def setCouleurE(self,x):
         self.colorE=x
+
+
+
+
+
+    #on cree la matri par rapport au fichier fournis
+    def creerViaFichier(self):
+        self.L = int(self.fichier[0])
+        self.l = int(self.fichier[1])
+
+
+
+        self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
+        
+        #self.tab.append([])
+        for i in range(2,(self.L*self.l)+2):
+
+            if (i-2)%self.l==0:
+                print()
+            print(len(self.fichier[i]))
+            #self.tab[x].append(case())
+
+
+            if "g" in self.fichier[i]:
+                self.tab[(i-2)%self.L][(i-2)//self.L].setGauche(True)
+            if "d" in self.fichier[i]:
+                self.tab[(i-2)%self.L][(i-2)//self.L].setDroite(True)
+            if "h" in self.fichier[i]:
+                self.tab[(i-2)%self.L][(i-2)//self.L].setHaut(True)
+            if "b" in self.fichier[i]:
+                self.tab[(i-2)%self.L][(i-2)//self.L].setBas(True)
+            
+            print(self.tab[(i-2)%self.L][(i-2)//self.L].__dict__) 
+            print((i-2)%self.L,", ",(i-2)//self.L)
+
+            
+              
+                
+                       
+        
+
+        global f
+        self.f=f
+        self.f.creerCanvas(self.L
+                           ,self.l, self.tab)
+
+        #on place les murs
+        for i in range((self.L) ):
+            for j in range(self.l):
+                self.f.placeMur(self.tab[i][j],i,j)
+
+
+                
+
+
+
+
+
 
 
     #cree la matrice par rapport au paramètre.
@@ -882,8 +963,25 @@ bouton()
 
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
 infoRicochet=[2,2,2,2]
-                
-tableau=matrice(20,20,40,infoRicochet, solvable = True)
+
+##si in fichier est passer en paramètre
+##organisation du fichier: [longueur,largeur,hb, gd, etc... 
+if len(sys.argv) == 2:
+
+    #pour evitez certaines erreurs:
+    with open(sys.argv[1],"r") as fichier:
+    
+        #print(fichier.read())
+        contenu=fichier.read()
+        print(contenu)
+        contenu = contenu.split(",")
+        tableau=matrice(fichier = contenu)
+
+        
+
+#par défault
+else:      
+    tableau=matrice(20,20,40,infoRicochet, solvable = True)
 
 
 
@@ -894,7 +992,7 @@ menubar = Menu(f.fenetre)
 
 menu1 = Menu(menubar, tearoff=0)
 menu1.add_command(label="commencer", command=reset)
-menu1.add_command(label="pause", command=tableau.pause)
+#menu1.add_command(label="pause", command=tableau.pause)
 menubar.add_cascade(label="Fichier", menu=menu1)
 f.fenetre.config(menu=menubar)
 
