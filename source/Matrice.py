@@ -127,13 +127,13 @@ class matrice:
     def creerViaFichier(self):
         self.L = int(self.fichier[0])
         self.l = int(self.fichier[1])
-
-
+        self.bot = int(self.fichier[2])
+        self.exit = int(self.fichier[3])
 
         self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
         
-        #self.tab.append([])
-        for i in range(2,(self.L*self.l)+2):
+        ##remplis le tableau en indiquant la position des murs
+        for i in range(4,(self.L*self.l)+4):
 
             if (i-2)%self.l==0:
                 print()
@@ -142,34 +142,33 @@ class matrice:
 
 
             if "g" in self.fichier[i]:
-                self.tab[(i-2)%self.L][(i-2)//self.L].setGauche(True)
+                self.tab[(i-4)%self.L][(i-4)//self.L].setGauche(True)
             if "d" in self.fichier[i]:
-                self.tab[(i-2)%self.L][(i-2)//self.L].setDroite(True)
+                self.tab[(i-4)%self.L][(i-4)//self.L].setDroite(True)
             if "h" in self.fichier[i]:
-                self.tab[(i-2)%self.L][(i-2)//self.L].setHaut(True)
+                self.tab[(i-4)%self.L][(i-4)//self.L].setHaut(True)
             if "b" in self.fichier[i]:
-                self.tab[(i-2)%self.L][(i-2)//self.L].setBas(True)
+                self.tab[(i-4)%self.L][(i-4)//self.L].setBas(True)
             
-            print(self.tab[(i-2)%self.L][(i-2)//self.L].__dict__) 
-            print((i-2)%self.L,", ",(i-2)//self.L)
+            print(self.tab[(i-4)%self.L][(i-4)//self.L].__dict__) 
+            print((i-4)%self.L,", ",(i-4)//self.L)
 
             
-              
-                
+        ##on place les robots:
+        for i in range((self.L*self.l)+4,(self.L*self.l)+4+self.bot*3,3):
+
+            
+            self.tabR.append(robot(int(self.fichier[i]),int(self.fichier[i+1]),self.fichier[i+2]))
+            self.tab[int(self.fichier[i])][int(self.fichier[i+1])].setRobot(True)
                        
-        
-
-        global f
-        self.f=f
-        self.f.creerCanvas(self.L
-                           ,self.l, self.tab)
-
-        #on place les murs
-        for i in range((self.L) ):
-            for j in range(self.l):
-                self.f.placeMur(self.tab[i][j],i,j)
+        borne = (self.L*self.l)+4+self.bot*3
+        for i in range(borne,borne+self.exit*3,3):
+            self.tabS.append(sortie(int(self.fichier[i]),int(self.fichier[i+1]),self.fichier[i+2]))
+            self.tab[int(self.fichier[i])][int(self.fichier[i+1])].setSortie(True)
 
 
+
+        self.creerInterface()
                 
 
 

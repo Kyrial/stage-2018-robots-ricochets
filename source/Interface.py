@@ -19,7 +19,7 @@ class interface:
 
         for li in range(0,L):
             for co in range(0,l):
-                print( "li :",li , "co : ", co)
+                #print( "li :",li , "co : ", co)
                 
                 if case[li][co] == 0:
                     self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
