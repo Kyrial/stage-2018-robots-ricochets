@@ -125,46 +125,61 @@ class matrice:
 
     #on cree la matri par rapport au fichier fournis
     def creerViaFichier(self):
-        self.L = int(self.fichier[0])
-        self.l = int(self.fichier[1])
-        self.bot = int(self.fichier[2])
-        self.exit = int(self.fichier[3])
+        self.L = int(self.fichier[0][0])
+        self.l = int(self.fichier[0][1])
+        self.bot = len(self.fichier[2])//3
+        self.exit = len(self.fichier[3])//3
 
         self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
         
         ##remplis le tableau en indiquant la position des murs
-        for i in range(4,(self.L*self.l)+4):
+        for i in range((self.L*self.l)):
 
-            if (i-2)%self.l==0:
+            if (i)%self.l==0:
                 print()
-            print(len(self.fichier[i]))
+            print(len(self.fichier[1][i]))
             #self.tab[x].append(case())
 
 
-            if "g" in self.fichier[i]:
-                self.tab[(i-4)%self.L][(i-4)//self.L].setGauche(True)
-            if "d" in self.fichier[i]:
-                self.tab[(i-4)%self.L][(i-4)//self.L].setDroite(True)
-            if "h" in self.fichier[i]:
-                self.tab[(i-4)%self.L][(i-4)//self.L].setHaut(True)
-            if "b" in self.fichier[i]:
-                self.tab[(i-4)%self.L][(i-4)//self.L].setBas(True)
+            if "g" in self.fichier[1][i]:
+                self.tab[(i)%self.L][(i)//self.L].setGauche(True)
+            if "d" in self.fichier[1][i]:
+                self.tab[(i)%self.L][(i)//self.L].setDroite(True)
+            if "h" in self.fichier[1][i]:
+                self.tab[(i)%self.L][(i)//self.L].setHaut(True)
+            if "b" in self.fichier[1][i]:
+                self.tab[(i)%self.L][(i)//self.L].setBas(True)
             
-            print(self.tab[(i-4)%self.L][(i-4)//self.L].__dict__) 
-            print((i-4)%self.L,", ",(i-4)//self.L)
+            print(self.tab[(i)%self.L][(i)//self.L].__dict__) 
+            print((i)%self.L,", ",(i)//self.L)
 
+
+        ##comme la couleur dans le fichier est un nombre,
+            ##nous genererons une couleur aléatoire a partir de se nombre et le stoquerons dans un dico
+            ##(pour pouvoir acceder a la couleur grace a se nombre)
+        dicoCouleur= {}
             
         ##on place les robots:
-        for i in range((self.L*self.l)+4,(self.L*self.l)+4+self.bot*3,3):
+        for i in range(0,self.bot*3,3):
+            if not (self.fichier[2][i+2] in dicoCouleur ): #si la couleur n'est pas enregistrer 
+                dicoCouleur[self.fichier[2][i+2]] =self.genererCouleur() 
+                self.tabCouleur.append(dicoCouleur[self.fichier[2][i+2]])
+            couleur = dicoCouleur[self.fichier[2][i+2]]
+            print(couleur)
 
             
-            self.tabR.append(robot(int(self.fichier[i]),int(self.fichier[i+1]),self.fichier[i+2]))
-            self.tab[int(self.fichier[i])][int(self.fichier[i+1])].setRobot(True)
+            self.tabR.append(robot(int(self.fichier[2][i]),int(self.fichier[2][i+1]),couleur))
+            self.tab[int(self.fichier[2][i])][int(self.fichier[2][i+1])].setRobot(True)
                        
-        borne = (self.L*self.l)+4+self.bot*3
-        for i in range(borne,borne+self.exit*3,3):
-            self.tabS.append(sortie(int(self.fichier[i]),int(self.fichier[i+1]),self.fichier[i+2]))
-            self.tab[int(self.fichier[i])][int(self.fichier[i+1])].setSortie(True)
+        ##on place les sortie
+        for i in range(0,self.exit*3,3):
+            if not (self.fichier[2][i+2] in dicoCouleur ): #si la couleur n'est pas enregistrer 
+                dicoCouleur[self.fichier[2][i+2]] =self.genererCouleur() 
+            
+            couleur = dicoCouleur[self.fichier[2][i+2]]
+            print(couleur)
+            self.tabS.append(sortie(int(self.fichier[3][i]),int(self.fichier[3][i+1]),couleur))
+            self.tab[int(self.fichier[3][i])][int(self.fichier[3][i+1])].setSortie(True)
 
 
 
@@ -919,7 +934,60 @@ def bouton():
     bouton.grid(column =4,rowspan=3, row=9) #, sticky= "c" )
     
     
+def sauvegarder():
+    global tableau
+    if tableau != None:
+        print("sauvegarde !")
+        numero=0
+        while os.path.isfile("save."+str(numero)):
+            numero=numero+1;
+        
+        nomF="save."+str(numero)
 
+
+        
+        with open(nomF,"w") as fichier:
+    
+            #print(fichier.read())
+            #print("%s,%s;" % (tableau.L, tableau.l))
+            
+            fichier.write("%s,%s;" % (tableau.L, tableau.l))
+            fichier.write("\n\n")
+            for j in range(tableau.l):
+                for i in range(tableau.L):
+                    donnee=","
+                    if tableau.tab[i][j].getHaut():
+                        donnee="h"+donnee
+                    if tableau.tab[i][j].getBas():
+                        donnee="b"+donnee
+                    if tableau.tab[i][j].getDroite():
+                        donnee="d"+donnee
+                    if tableau.tab[i][j].getGauche():
+                        donnee="g"+donnee
+                    
+                    fichier.write(donnee)
+                fichier.write("\n")
+            fichier.write("\n;")
+            
+            ##besoin de créer un nouveau dico de couleur
+                ##car lors de la création nous avons utilisé 2méthode différente
+                ##suivant si on genere la grille a l'aide d'un fichier ou non
+            dicoCouleur={}
+            for k in range(len(tableau.tabCouleur)):
+                dicoCouleur[tableau.tabCouleur[k]]=k
+            
+            for r in range(tableau.bot):
+                fichier.write("%s,%s,%s\n," % (tableau.tabR[r].getX(),
+                                          tableau.tabR[r].getY() ,
+                                          dicoCouleur[tableau.tabR[r].getCouleur()] ))
+            fichier.write("\n;")
+            for s in range(tableau.exit):                    
+               fichier.write("%s,%s,%s\n," % (tableau.tabS[s].getX(),
+                                             tableau.tabS[s].getY() ,
+                                             dicoCouleur[tableau.tabS[s].getCouleur()] ))
+                    
+
+    
     
     
     
@@ -973,7 +1041,14 @@ if len(sys.argv) == 2:
         #print(fichier.read())
         contenu=fichier.read()
         print(contenu)
-        contenu = contenu.split(",")
+        ##on sépare les information (entête, info matrice, robot, sortie)
+        contenu = contenu.split(";")
+        print(contenu)
+        ##puis on sépare chaque éléments
+        for i in range(len(contenu)):
+            print(contenu[i])
+            contenu[i] = contenu[i].split(",")
+        print(contenu)
         tableau=matrice(fichier = contenu)
 
         
@@ -991,7 +1066,9 @@ menubar = Menu(f.fenetre)
 
 menu1 = Menu(menubar, tearoff=0)
 menu1.add_command(label="commencer", command=reset)
-#menu1.add_command(label="pause", command=tableau.pause)
+#if tableau !=None:
+ #   menu1.add_command(label="pause", command=tableau.pause)
+menu1.add_command(label="Sauvegarder", command=sauvegarder)
 menubar.add_cascade(label="Fichier", menu=menu1)
 f.fenetre.config(menu=menubar)
 

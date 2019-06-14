@@ -8,12 +8,3 @@ ghbd,bd,bd,bd;
 2,1,2;
 2,0,1,
 2,1,2,
-
-4,5,2,2,
-gbdh,h,hb,hbd,
-gg,bd,,bd,
-gbd,,,d,
-g,,,d,
-ghbd,bd,bd,bd
-,2,3,red,0,1,yellow,2,0,red,2,1,yellow,
-
