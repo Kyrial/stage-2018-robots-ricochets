@@ -3,6 +3,9 @@ import random
 
 import sys, os
 
+##messagebox:
+from tkinter.messagebox import *
+
 #import Plateau
 
 #on importe les autres classes: case, robot, sortie, interface
@@ -39,7 +42,12 @@ class matrice:
 
     ##constructeur
     def __init__(self, longueur=10, largeur=10, densite=60, infoRicochet=[2,2,2,2],
-                 solvable = False,mouvement=10, fichier= None):
+                 solvable = False,mouvement=10, fichier= None,edition=False):
+
+        ##on lie l'interface a l'objet
+        global f
+        self.f=f
+        
 
         #tableau de robots
         self.tabR=[]
@@ -54,8 +62,12 @@ class matrice:
         self.tabCouleur = []
 
         self.reinitialise()
+
+        if edition:
+
+            self.editeur()
         
-        if fichier ==None:
+        elif fichier ==None:
 
             self.L = longueur
             self.l = largeur
@@ -118,6 +130,83 @@ class matrice:
         self.exit=x
     def setCouleurE(self,x):
         self.colorE=x
+
+
+    def changeCase(self,event):
+        print("blablabla")
+        x = self.f.canvas.canvasx (event.x)
+        y = self.f.canvas.canvasy (event.y)
+        print(x,"  ", y)
+        x=int(x//self.f.tailleCase)
+        y=int(y//self.f.tailleCase)
+        print(x,"  ", y)
+        if self.f.caseCocher.get() == "haut":
+            if self.tab[x][y].getHaut()==True:
+                self.tab[x][y].setHaut(False)
+                self.f.canvas.delete(str(self.tab[x][y].getId())+"h")
+            else:   
+                self.tab[x][y].setHaut(True)
+                self.f.placeMur(self.tab[x][y],x,y)
+                
+        if self.f.caseCocher.get() == "bas":
+            if self.tab[x][y].getBas()==True:
+                self.tab[x][y].setBas(False)
+                self.f.canvas.delete(str(self.tab[x][y].getId())+"b")
+            else:   
+                self.tab[x][y].setBas(True)
+                self.f.placeMur(self.tab[x][y],x,y)
+                
+        if self.f.caseCocher.get() == "droite":
+            if self.tab[x][y].getDroite()==True:
+                self.tab[x][y].setDroite(False)
+                self.f.canvas.delete(str(self.tab[x][y].getId())+"d")
+            else:   
+                self.tab[x][y].setDroite(True)
+                self.f.placeMur(self.tab[x][y],x,y)
+                
+        if self.f.caseCocher.get() == "gauche":
+            if self.tab[x][y].getGauche()==True:
+                self.tab[x][y].setGauche(False)
+                self.f.canvas.delete(str(self.tab[x][y].getId())+"g")
+            else:   
+                self.tab[x][y].setGauche(True)
+                self.f.placeMur(self.tab[x][y],x,y)
+            
+
+    def editeur(self):
+        
+        if askyesno("Attention !","effacer la grille actuel ?") or self.tab== [] :
+            print("miaou")
+            #tableau de robots
+            self.tabR=[]
+            #la matrice
+            self.tab= []
+            #tableau des sorties
+            self.tabS = []
+            #tableau des différentes couleur utilisé
+            self.tabCouleur = []
+
+            self.bot = 0
+            self.exit =0
+
+            self.L = 10
+            self.l = 10
+
+            self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
+
+            self.f.canvas.destroy()
+            self.f.creerCanvas(self.L,self.l, self.tab)
+            
+            
+        else:
+            print("pas de miaou")
+
+        
+        self.f.canvas.focus_set()
+
+        self.f.canvas.bind("<Button-1>", self.changeCase)
+
+
 
 
 
@@ -580,31 +669,37 @@ class matrice:
 
 
 
+
+    def placeMur(self):
+        #on place les murs
+        for i in range((self.L) ):
+            for j in range(self.l):
+                self.f.placeMur(self.tab[i][j],i,j)       
+
+    def placeSorties(self):
+        #on place les sorties
+        for i in range(self.getSortie()):
+            Id=self.f.placeSortie(self.tabS[i])
+            self.tabS[i].setId(Id)
+
+    def placeRobots(self):               
+        #on place les robots
+        for i in range(self.getRobot()):            
+            Id = self.f.placeRobot(self.tabR[i])
+            ##on lie l'Id du cercle au robot
+            self.tabR[i].setId(Id)
+
         
       
     ## Appelle les fonctions nécessaire à l'affichage graphique par rapport
     ## aux données précédemment inscritent dans la grille.
     def creerInterface(self):
-        global f
-        self.f=f
+
         self.f.creerCanvas(self.L,self.l, self.tab)
 
-        #on place les murs
-        for i in range((self.L) ):
-            for j in range(self.l):
-                self.f.placeMur(self.tab[i][j],i,j)
-
-        #on place les sorties
-        for i in range(self.getSortie()):
-            Id=self.f.placeSortie(self.tabS[i])
-            self.tabS[i].setId(Id)
-                
-        #on place les robots
-        for i in range(self.getRobot()):            
-            Id = self.f.placeRobot(self.tabR[i])
-
-            ##on lie l'Id du cercle au robot
-            self.tabR[i].setId(Id)
+        self.placeMur()
+        self.placeSorties()
+        self.placeRobots()
 
 
         self.f.canvas.focus_set()
@@ -905,7 +1000,7 @@ class matrice:
 
 def reset():
     print("reset")
-    print(f.resolve.get())
+    
     infoRicochet=[]
     for i in range(len(f.recupInfo)-1):
         if f.recupInfo[i].get() == "":
@@ -930,12 +1025,13 @@ def reset():
 
     
 def bouton():
-    bouton=Button(f.fenetre, text="Valider", command=reset)
+    bouton=Button(f.frameSelection, text="Valider", command=reset)
     bouton.grid(column =4,rowspan=3, row=9) #, sticky= "c" )
     
     
 def sauvegarder():
     global tableau
+    print(tableau)
     if tableau != None:
         print("sauvegarde !")
         numero=0
@@ -987,8 +1083,20 @@ def sauvegarder():
                                              dicoCouleur[tableau.tabS[s].getCouleur()] ))
                     
 
+def edition():
+    global f
+    global tableau
+    #on cache la frame
+    f.frameSelection.grid_forget()
+
     
-    
+#    f.frameSelection.grid(column=2, row=1)
+ #   f.frameSelection.grid_propagate(0)
+
+    if tableau == None:
+        tableau=matrice(edition=True)
+    else:
+        tableau.editeur()
     
     
 
@@ -1026,6 +1134,8 @@ f.zoneSelection()
 ##pour eviter bug, bouton de validation séparé
 bouton()
 
+f.zoneEdition()
+
 
 
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
@@ -1033,22 +1143,19 @@ infoRicochet=[2,2,2,2]
 
 ##si in fichier est passer en paramètre
 ##organisation du fichier: [longueur,largeur,hb, gd, etc... 
+
+
 if len(sys.argv) == 2:
 
     #pour evitez certaines erreurs:
-    with open(sys.argv[1],"r") as fichier:
-    
-        #print(fichier.read())
+    with open(sys.argv[1],"r") as fichier:   
+
         contenu=fichier.read()
-        print(contenu)
         ##on sépare les information (entête, info matrice, robot, sortie)
         contenu = contenu.split(";")
-        print(contenu)
         ##puis on sépare chaque éléments
         for i in range(len(contenu)):
-            print(contenu[i])
             contenu[i] = contenu[i].split(",")
-        print(contenu)
         tableau=matrice(fichier = contenu)
 
         
@@ -1056,7 +1163,7 @@ if len(sys.argv) == 2:
 #par défault
 else:      
     tableau=matrice(20,20,40,infoRicochet, solvable = True)
-
+    #reset()
 
 
 
@@ -1065,10 +1172,11 @@ else:
 menubar = Menu(f.fenetre)
 
 menu1 = Menu(menubar, tearoff=0)
-menu1.add_command(label="commencer", command=reset)
+menu1.add_command(label="Commencer", command=reset)
 #if tableau !=None:
  #   menu1.add_command(label="pause", command=tableau.pause)
 menu1.add_command(label="Sauvegarder", command=sauvegarder)
+menu1.add_command(label="Mode Edition", command=edition)
 menubar.add_cascade(label="Fichier", menu=menu1)
 f.fenetre.config(menu=menubar)
 

@@ -32,19 +32,23 @@ class interface:
                     case[li][co].setId(Id)
                 
         
-        self.canvas.grid(column =0, row=1, columnspan=2,rowspan = 11)
+        self.canvas.grid(column =2, row=1, columnspan=2) #,rowspan = 11)
         self.creerLabelNbMove()
 
     def placeMur(self, cases, x, y):
+    
         if cases.getHaut():
-            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , (x+1)*self.tailleCase , y*self.tailleCase, width=6-log(5*self.tailleCase,10))
+            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , (x+1)*self.tailleCase , y*self.tailleCase,
+                                    width=6-log(5*self.tailleCase,10),tags= str(cases.getId())+"h")
         if cases.getBas():
-            self.canvas.create_line(x*self.tailleCase   , (y+1)*self.tailleCase, (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=6-log(5*self.tailleCase,10))
+            self.canvas.create_line(x*self.tailleCase   , (y+1)*self.tailleCase, (x+1)*self.tailleCase , (y+1)*self.tailleCase,
+                                    width=6-log(5*self.tailleCase,10),tags= str(cases.getId())+"b")
         if cases.getDroite():
-            self.canvas.create_line((x+1)*self.tailleCase, y*self.tailleCase   , (x+1)*self.tailleCase , (y+1)*self.tailleCase, width=6-log(5*self.tailleCase,10))
+            self.canvas.create_line((x+1)*self.tailleCase, y*self.tailleCase   , (x+1)*self.tailleCase , (y+1)*self.tailleCase,
+                                    width=6-log(5*self.tailleCase,10),tags= str(cases.getId())+"d")
         if cases.getGauche():
-            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , x*self.tailleCase    , (y+1)*self.tailleCase, width=6-log(5*self.tailleCase,10))
-
+            self.canvas.create_line(x*self.tailleCase   , y*self.tailleCase   , x*self.tailleCase    , (y+1)*self.tailleCase,
+                                    width=6-log(5*self.tailleCase,10),tags= str(cases.getId())+"g")
     def placeRobot(self,robot):
        
         identifiant = self.canvas.create_oval(robot.getX()*self.tailleCase+(self.tailleCase/10),(robot.getY()*self.tailleCase)+(self.tailleCase/10),
@@ -66,9 +70,9 @@ class interface:
 
     def creerLabelNbMove(self):
         self.phrase = Label(self.fenetre, text="Nombres de déplacements: ",font=20)
-        self.phrase.grid(column =0, row=0, sticky= "e" )
+        self.phrase.grid(column =2, row=0, sticky= "e" )
         self.score = Label(self.fenetre, text="0",font=20)
-        self.score.grid(column =1, row=0, sticky= "w" )
+        self.score.grid(column =3, row=0, sticky= "w" )
 
     def labelGagner(self, compteur):
         ##probleme de dexture si on modifie seulement le Label
@@ -84,6 +88,10 @@ class interface:
 
 
     def zoneSelection(self):
+        self.frameSelection = Frame(self.fenetre, borderwidth=2,height =615,width = 250,  relief=GROOVE)
+        self.frameSelection.grid(column=4, row=1)
+        self.frameSelection.grid_propagate(0)
+    
 
         self.creerLabel(1,"Entrez le nombres de Robots")
         self.creerLabel(3,"Entrez le nombres de \n couleurs de Robots")
@@ -100,39 +108,52 @@ class interface:
 
         ##variable de controle
         self.resolve= IntVar()
-        Checkbutton(self.fenetre, text="resolvable",variable=self.resolve, onvalue=1, offvalue=0).grid(column =3, row=9,sticky= "s")
+        Checkbutton(self.frameSelection, text="resolvable",variable=self.resolve, onvalue=1, offvalue=0).grid(column =3, row=9,sticky= "s")
 
         
 
     def creerLabel(self, ligne, texte,colonnespan = 2):
-        Label(self.fenetre, text = texte, font=20).grid(column =3,columnspan = colonnespan, row=ligne, sticky= "s" )
- 
+        Label(self.frameSelection, text = texte, font=20,pady = 10).grid(column =3,columnspan = colonnespan, row=ligne, sticky= "s" )
+
 
     def afficheSaisie(self,ligne,colonnespan=2):        
         validatecmd = (self.fenetre.register(OnValidate), '%S', '%P')
-        e = Entry(self.fenetre, validate="key", vcmd=validatecmd,width=6)
-        e.grid(column =3, row=ligne,columnspan = colonnespan, sticky= "n" )
+        e = Entry(self.frameSelection, validate="key", vcmd=validatecmd,width=6)
+        e.grid(column =3, row=ligne,columnspan = colonnespan,pady = 10, sticky= "n" )
         return e
 
-##
-##    def resetBouton(self):
-##        print("reset")
-##        if self.recupInfo[0].get() == "":
-##            print("miaouuuuu")
-##
-##        ##l'encienne grille n'est plus référencer et est donc supprimé automatiquement
-##        from Matrice import reset
-##
-##        reset()
-##        
 
-    
+    def zoneEdition(self):
+        self.frameEdition = Frame(self.fenetre, borderwidth=2,height =615,width = 250,  relief=GROOVE)
+        self.frameEdition.grid(column=0, row=1)
+        self.frameEdition.grid_propagate(0)
+        self.editionCarre(1,1)
 
+    def editionCarre(self, ligne,direction):
+
+        self.imageHaut = PhotoImage(file="murHaut.png")
+        self.imageBas = PhotoImage(file="murBas.png")
+        self.imageDroite = PhotoImage(file="murDroite.png")
+        self.imageGauche = PhotoImage(file="murGauche.png")
+        ##variable de controle
+        self.caseCocher= StringVar()
+        
+        Checkbutton(self.frameEdition,image=self.imageHaut,variable=self.caseCocher,
+                    onvalue="haut", offvalue="",pady = 10).grid(column =0, row=1,sticky= "s")
+
+      
+        Checkbutton(self.frameEdition,image=self.imageGauche,variable=self.caseCocher,
+                    onvalue="gauche", offvalue="",pady = 10).grid(column =0, row=2,sticky= "s")
+        
+        Checkbutton(self.frameEdition,image=self.imageBas,variable=self.caseCocher,
+                    onvalue="bas", offvalue="",pady = 10).grid(column =0, row=3,sticky= "s")        
+
+        Checkbutton(self.frameEdition,image=self.imageDroite,variable=self.caseCocher,
+                    onvalue="droite", offvalue="",pady = 10).grid(column =0, row=4,sticky= "s")
 
 
 def OnValidate(S,P):
     if S.isdigit():
-
         if P == "" or int(P,10) <= 100:
             return True
     return False
