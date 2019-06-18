@@ -135,14 +135,36 @@ class matrice:
         self.colorE=x
 
 
+    def ajoutBordure(self):
+        for i in range((self.L) ):
+            for j in range(self.l):             
+                ##on ajoute un mur aux bordures de la grille par sécurité
+                if i==0:
+                    self.tab[i][j].setGauche(True)
+                if i==self.L-1:
+                    self.tab[i][j].setDroite(True)
+                if j==0:
+                    self.tab[i][j].setHaut(True)
+                if j==self.l-1:
+                    self.tab[i][j].setBas(True)
+
+
+
     def changeCase(self,event):
-        print("blablabla")
+        
         x = self.f.canvas.canvasx (event.x)
         y = self.f.canvas.canvasy (event.y)
+        
 
 
         x=int(x//self.f.tailleCase)
         y=int(y//self.f.tailleCase)
+
+        ##pour que les coordonnée soit au centre de la case
+        ##et pour que dans les cas le robot/sortie soit selectionnée
+        item=self.f.canvas.find_closest(int(x*self.f.tailleCase+(self.f.tailleCase/2)),
+                                        int(y*self.f.tailleCase+(self.f.tailleCase/2)))
+        
         print(x,"  ", y)
         if self.f.caseCocher.get() == "haut":
             if self.tab[x][y].getHaut()==True:
@@ -175,7 +197,109 @@ class matrice:
             else:   
                 self.tab[x][y].setGauche(True)
                 self.f.placeMur(self.tab[x][y],x,y)
-            
+
+        if self.f.caseCocher.get() == "robot":
+            if self.tab[x][y].getRobot()==True:
+               
+                self.tab[x][y].setRobot(False)
+                for i in range(len(self.tabR)):
+                    if self.tabR[i].getId() == item[0]:
+                        self.f.canvas.delete(item[0])
+                        print("miau")
+                        del self.tabR[i]
+                        self.bot = self.bot-1
+                        
+                        break
+                                
+                #self.f.canvas.delete(str(self.tab[x][y].getId())+"g")
+            elif(self.tab[x][y].getSortie()==False and
+                 self.tab[x][y].getRobot()==False):
+                
+                self.tab[x][y].setRobot(True)
+                self.couleurPipette=self.genererCouleur()
+                self.tabR.append(robot(x,y,self.couleurPipette))
+                Id=self.f.placeRobot(self.tabR[-1])
+                self.tabR[-1].setId(Id)
+                self.bot = self.bot+1
+
+
+        if self.f.caseCocher.get() == "sortie":
+            if self.tab[x][y].getSortie()==True:
+               
+                self.tab[x][y].setSortie(False)
+                for i in range(len(self.tabS)):
+                    if self.tabS[i].getId() == item[0]:
+                        self.f.canvas.delete(item[0])
+                        print("miau")
+                        del self.tabS[i]
+                        self.exit =self.exit -1
+                        
+                        break
+                                
+                #self.f.canvas.delete(str(self.tab[x][y].getId())+"g")
+            elif(self.tab[x][y].getSortie()==False and
+                 self.tab[x][y].getRobot()==False):
+                
+                self.tab[x][y].setSortie(True)
+                self.couleurPipette=self.genererCouleur()
+                self.tabS.append(sortie(x,y,self.couleurPipette))
+                Id=self.f.placeSortie(self.tabS[-1])
+                self.tabS[-1].setId(Id)
+                self.exit = self.exit+1
+
+
+    def cliqueDroit(self,event):
+        x = self.f.canvas.canvasx (event.x)
+        y = self.f.canvas.canvasy (event.y)
+        
+        x=int(x//self.f.tailleCase)
+        y=int(y//self.f.tailleCase)
+
+        item=self.f.canvas.find_closest(int(x*self.f.tailleCase+(self.f.tailleCase/2)),
+                                        int(y*self.f.tailleCase+(self.f.tailleCase/2)))
+
+        if self.tab[x][y].getSortie()==True:
+
+            for i in range(len(self.tabS)):
+                if self.tabS[i].getId() == item[0]:
+
+                    self.couleurPipette = self.tabS[i].getCouleur()
+                    break
+                
+        if self.tab[x][y].getRobot()==True:
+        
+            for i in range(len(self.tabR)):
+                if self.tabR[i].getId() == item[0]:
+
+                    self.couleurPipette = self.tabR[i].getCouleur()
+                    break
+
+
+
+
+        if self.f.caseCocher.get() == "robot":
+
+
+            if (self.tab[x][y].getSortie()==False and
+                 self.tab[x][y].getRobot()==False):
+                self.tab[x][y].setRobot(True)
+                self.tabR.append(robot(x,y,self.couleurPipette))
+                Id=self.f.placeRobot(self.tabR[-1])
+                self.tabR[-1].setId(Id)
+                self.bot = self.bot+1
+                
+        if self.f.caseCocher.get() == "sortie":
+
+            if (self.tab[x][y].getSortie()==False and
+                 self.tab[x][y].getRobot()==False):  
+                self.tab[x][y].setSortie(True)
+                self.tabS.append(sortie(x,y,self.couleurPipette))
+                Id=self.f.placeSortie(self.tabS[-1])
+                self.tabS[-1].setId(Id)
+                self.exit = self.exit+1
+                
+
+        
 
     def editeur(self):
         
@@ -196,14 +320,22 @@ class matrice:
             self.l = 10
             self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
 
-            self.f.canvas.destroy()
+
+            self.f.canvas.destroy() 
+            self.ajoutBordure()     
             self.f.creerCanvas(self.L,self.l, self.tab)
-            
+            for i in range((self.L) ):
+                for j in range(self.l):
+                    self.f.placeMur(self.tab[i][j],i,j)
         
         self.f.canvas.focus_set()
 
         #self.f.canvas.bind("<B1-Motion>", self.changeCase)
+
+        self.couleurPipette = "red"
+        
         self.f.canvas.bind("<Button-1>", self.changeCase)
+        self.f.canvas.bind("<Button-3>", self.cliqueDroit)
 
 
 
@@ -230,8 +362,7 @@ class matrice:
                 self.tab[(i)%self.L][(i)//self.L].setHaut(True)
             if "b" in self.fichier[1][i]:
                 self.tab[(i)%self.L][(i)//self.L].setBas(True)
-            
-    
+              
 
 
         ##comme la couleur dans le fichier est un nombre,
@@ -1032,6 +1163,9 @@ def quitteEditeur():
     ##et on affiche la frame d'edition
     f.frameSelection.grid(column=4, row=1)
     f.frameSelection.grid_propagate(0)
+
+    f.canvas.unbind("<Button-3>")
+
 
     #on lance la partie
     tableau.executePartie()

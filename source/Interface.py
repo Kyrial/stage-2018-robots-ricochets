@@ -30,6 +30,8 @@ class interface:
                                                  (li+1)*self.tailleCase,(co+1)*self.tailleCase,
                                         fill='blue', tags= 'carre')
                     case[li][co].setId(Id)
+                    ##on pourrait placer les mur directement ici
+                    #self.PlaceMur(
                 
         
         self.canvas.grid(column =2, row=1, columnspan=2) #,rowspan = 11)
