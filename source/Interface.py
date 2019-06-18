@@ -125,16 +125,16 @@ class interface:
 
     def zoneEdition(self):
         self.frameEdition = Frame(self.fenetre, borderwidth=2,height =615,width = 250,  relief=GROOVE)
-        self.frameEdition.grid(column=0, row=1)
+        self.frameEdition.grid(column=4, row=1)
         self.frameEdition.grid_propagate(0)
-        self.editionCarre(1,1)
+        self.editionCarre()
 
-    def editionCarre(self, ligne,direction):
+    def editionCarre(self):
 
-        self.imageHaut = PhotoImage(file="murHaut.png")
-        self.imageBas = PhotoImage(file="murBas.png")
-        self.imageDroite = PhotoImage(file="murDroite.png")
-        self.imageGauche = PhotoImage(file="murGauche.png")
+        self.imageHaut = PhotoImage(file="Images/murHaut.png")
+        self.imageBas = PhotoImage(file="Images/murBas.png")
+        self.imageDroite = PhotoImage(file="Images/murDroite.png")
+        self.imageGauche = PhotoImage(file="Images/murGauche.png")
         ##variable de controle
         self.caseCocher= StringVar()
         
@@ -150,6 +150,21 @@ class interface:
 
         Checkbutton(self.frameEdition,image=self.imageDroite,variable=self.caseCocher,
                     onvalue="droite", offvalue="",pady = 10).grid(column =0, row=4,sticky= "s")
+
+
+
+        Checkbutton(self.frameEdition,text="robot",variable=self.caseCocher,
+                    onvalue="robot", offvalue="",pady = 10).grid(column =0, row=5,sticky= "s")
+
+        Checkbutton(self.frameEdition,text="sortie",variable=self.caseCocher,
+                    onvalue="sortie", offvalue="",pady = 10).grid(column =0, row=6,sticky= "s")
+##
+##
+##        self.memeCouleurCocher=StringVar()
+##        Checkbutton(self.frameEdition,text="pour les robots/sortie \n garder meme couleur ?",variable=self.memeCouleurCocher,
+##                    onvalue="yes", offvalue="",pady = 10).grid(column =1, row=5,rowspan = 2)#,sticky= "s")
+##
+
 
 
 def OnValidate(S,P):

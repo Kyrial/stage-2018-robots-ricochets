@@ -6,6 +6,9 @@ import sys, os
 ##messagebox:
 from tkinter.messagebox import *
 
+##ppour ouvrir la fenetre de recherche de fichier
+from tkinter.filedialog import *
+
 #import Plateau
 
 #on importe les autres classes: case, robot, sortie, interface
@@ -64,8 +67,8 @@ class matrice:
         self.reinitialise()
 
         if edition:
-
             self.editeur()
+
         
         elif fichier ==None:
 
@@ -136,7 +139,8 @@ class matrice:
         print("blablabla")
         x = self.f.canvas.canvasx (event.x)
         y = self.f.canvas.canvasy (event.y)
-        print(x,"  ", y)
+
+
         x=int(x//self.f.tailleCase)
         y=int(y//self.f.tailleCase)
         print(x,"  ", y)
@@ -175,8 +179,7 @@ class matrice:
 
     def editeur(self):
         
-        if askyesno("Attention !","effacer la grille actuel ?") or self.tab== [] :
-            print("miaou")
+        if askyesno("Attention !","effacer la grille actuel ?") or self.tab== [] :            
             #tableau de robots
             self.tabR=[]
             #la matrice
@@ -191,24 +194,16 @@ class matrice:
 
             self.L = 10
             self.l = 10
-
             self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
 
             self.f.canvas.destroy()
             self.f.creerCanvas(self.L,self.l, self.tab)
             
-            
-        else:
-            print("pas de miaou")
-
         
         self.f.canvas.focus_set()
 
+        #self.f.canvas.bind("<B1-Motion>", self.changeCase)
         self.f.canvas.bind("<Button-1>", self.changeCase)
-
-
-
-
 
 
 
@@ -224,9 +219,6 @@ class matrice:
         ##remplis le tableau en indiquant la position des murs
         for i in range((self.L*self.l)):
 
-            if (i)%self.l==0:
-                print()
-            print(len(self.fichier[1][i]))
             #self.tab[x].append(case())
 
 
@@ -239,8 +231,7 @@ class matrice:
             if "b" in self.fichier[1][i]:
                 self.tab[(i)%self.L][(i)//self.L].setBas(True)
             
-            print(self.tab[(i)%self.L][(i)//self.L].__dict__) 
-            print((i)%self.L,", ",(i)//self.L)
+    
 
 
         ##comme la couleur dans le fichier est un nombre,
@@ -254,7 +245,7 @@ class matrice:
                 dicoCouleur[self.fichier[2][i+2]] =self.genererCouleur() 
                 self.tabCouleur.append(dicoCouleur[self.fichier[2][i+2]])
             couleur = dicoCouleur[self.fichier[2][i+2]]
-            print(couleur)
+           
 
             
             self.tabR.append(robot(int(self.fichier[2][i]),int(self.fichier[2][i+1]),couleur))
@@ -689,6 +680,10 @@ class matrice:
             ##on lie l'Id du cercle au robot
             self.tabR[i].setId(Id)
 
+
+    def executePartie(self):
+        self.f.canvas.focus_set()
+        self.f.canvas.bind("<Button-1>", self.clique)
         
       
     ## Appelle les fonctions nécessaire à l'affichage graphique par rapport
@@ -701,10 +696,8 @@ class matrice:
         self.placeSorties()
         self.placeRobots()
 
+        self.executePartie()
 
-        self.f.canvas.focus_set()
-
-        self.f.canvas.bind("<Button-1>", self.clique)
 
         #self.f.fenetre.mainloop()
         #global gagner
@@ -712,9 +705,9 @@ class matrice:
          #   break
                 
                 
+####fin initialisation partie            
             
-            
-
+####debut partie:
 
  
     ##gère l'evenement "clique souris"
@@ -995,9 +988,6 @@ class matrice:
 ###fonction d'evenement###        
 
 
-
-
-
 def reset():
     print("reset")
     
@@ -1023,11 +1013,38 @@ def reset():
     ##l'encienne grille n'est plus référencer et est donc supprimé automatiquement
     #tableau=matrice(10,10,4,infoRicochet)
 
+
+
+
+##fonction pour les zone de selections:
     
-def bouton():
+def boutonSelection():
     bouton=Button(f.frameSelection, text="Valider", command=reset)
     bouton.grid(column =4,rowspan=3, row=9) #, sticky= "c" )
-    
+
+##fonction pour les zones d'edition
+
+def quitteEditeur():
+    global tableau, f
+    #on cache la frame de Edition
+    f.frameEdition.grid_forget()
+
+    ##et on affiche la frame d'edition
+    f.frameSelection.grid(column=4, row=1)
+    f.frameSelection.grid_propagate(0)
+
+    #on lance la partie
+    tableau.executePartie()
+
+def boutonEdition():
+    bouton=Button(f.frameEdition, text="Valider", command=quitteEditeur)
+    bouton.grid(column =4,rowspan=3, row=9)
+
+
+
+
+
+###fonction de sauvegarde et de chargement:   
     
 def sauvegarder():
     global tableau
@@ -1035,10 +1052,10 @@ def sauvegarder():
     if tableau != None:
         print("sauvegarde !")
         numero=0
-        while os.path.isfile("save."+str(numero)):
+        while os.path.isfile("Saves/save("+str(numero)+").ri"):
             numero=numero+1;
         
-        nomF="save."+str(numero)
+        nomF="Saves/save("+str(numero)+").ri"
 
 
         
@@ -1081,17 +1098,33 @@ def sauvegarder():
                fichier.write("%s,%s,%s\n," % (tableau.tabS[s].getX(),
                                              tableau.tabS[s].getY() ,
                                              dicoCouleur[tableau.tabS[s].getCouleur()] ))
-                    
 
+##ouvre le fichier, le split et l'envoie a la classe tableau
+def chargerFichier(file):
+    #pour evitez certaines erreurs:
+    with open(file,"r") as fichier:   
+
+        contenu=fichier.read()
+        ##on sépare les information (entête, info matrice, robot, sortie)
+        contenu = contenu.split(";")
+        ##puis on sépare chaque éléments
+        for i in range(len(contenu)):
+            contenu[i] = contenu[i].split(",")
+        tableau=matrice(fichier = contenu)
+
+
+
+                   
+##initialise le mode édition
 def edition():
     global f
     global tableau
-    #on cache la frame
+    #on cache la frame de Selection
     f.frameSelection.grid_forget()
 
-    
-#    f.frameSelection.grid(column=2, row=1)
- #   f.frameSelection.grid_propagate(0)
+    ##et on affiche la frame d'edition
+    f.frameEdition.grid(column=4, row=1)
+    f.frameEdition.grid_propagate(0)
 
     if tableau == None:
         tableau=matrice(edition=True)
@@ -1099,6 +1132,19 @@ def edition():
         tableau.editeur()
     
     
+
+
+
+##ouvre la fenetre de dialogue pour charger une partie
+def menuCharger():
+    filename = askopenfilename(title="Charger la sauvegarde",filetypes=[('Ri files', '*.ri'),('txt files','.txt'),('all files','.*')])    
+    chargerFichier(filename)
+
+
+
+
+
+
 
 #import tkinter.colorchooser
 #couleur= tkinter.colorchooser.askcolor()
@@ -1128,15 +1174,20 @@ gagner=False
 pause=False
 
 #######
-
+#a certainement faire une fonction:
 ##fais apparaitre la zone de selection a droite
 f.zoneSelection()
 ##pour eviter bug, bouton de validation séparé
-bouton()
-
+boutonSelection()
+##
+##on crée la zone d'edition
 f.zoneEdition()
+##et on la cache
+f.frameEdition.grid_forget()
+boutonEdition()
 
 
+####
 
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
 infoRicochet=[2,2,2,2]
@@ -1144,20 +1195,9 @@ infoRicochet=[2,2,2,2]
 ##si in fichier est passer en paramètre
 ##organisation du fichier: [longueur,largeur,hb, gd, etc... 
 
-
+tableau= None
 if len(sys.argv) == 2:
-
-    #pour evitez certaines erreurs:
-    with open(sys.argv[1],"r") as fichier:   
-
-        contenu=fichier.read()
-        ##on sépare les information (entête, info matrice, robot, sortie)
-        contenu = contenu.split(";")
-        ##puis on sépare chaque éléments
-        for i in range(len(contenu)):
-            contenu[i] = contenu[i].split(",")
-        tableau=matrice(fichier = contenu)
-
+    chargerFichier(sys.argv[1])
         
 
 #par défault
@@ -1176,9 +1216,16 @@ menu1.add_command(label="Commencer", command=reset)
 #if tableau !=None:
  #   menu1.add_command(label="pause", command=tableau.pause)
 menu1.add_command(label="Sauvegarder", command=sauvegarder)
+menu1.add_command(label="Charger", command=menuCharger)
+menu1.add_separator()
 menu1.add_command(label="Mode Edition", command=edition)
 menubar.add_cascade(label="Fichier", menu=menu1)
 f.fenetre.config(menu=menubar)
+
+
+
+
+
 
 
 
