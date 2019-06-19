@@ -99,18 +99,22 @@ class interface:
         self.creerLabel(3,"Entrez le nombres de \n couleurs de Robots")
         self.creerLabel(5,"Entrez le nombres de sorties")
         self.creerLabel(7,"Entrez le nombres de \n couleurs de Robots")
-        self.creerLabel(10,"si resolvable, \n en combien de coup",1)
-
+        self.creerLabel(10,"Entrez respectivement: \n hauteur et largeur",1)
+        self.creerLabel(13,"si resolvable, \n en combien de coup",1)
         self.recupInfo = []
         for i in range(2,9,2):
             self.recupInfo.append( self.afficheSaisie(i))
-        self.recupInfo.append( self.afficheSaisie(11,colonnespan=1))
+
+        self.recupInfo.append( self.afficheSaisie(11,colonne=3,colonnespan=1))
+        self.recupInfo.append( self.afficheSaisie(11,colonne=4,colonnespan=1))
+        
+        self.recupInfo.append( self.afficheSaisie(14,colonnespan=1))
 
 
 
         ##variable de controle
         self.resolve= IntVar()
-        Checkbutton(self.frameSelection, text="resolvable",variable=self.resolve, onvalue=1, offvalue=0).grid(column =3, row=9,sticky= "s")
+        Checkbutton(self.frameSelection, text="resolvable",variable=self.resolve, onvalue=1, offvalue=0).grid(column =3, row=12,sticky= "s")
 
         
 
@@ -118,10 +122,10 @@ class interface:
         Label(self.frameSelection, text = texte, font=20,pady = 10).grid(column =3,columnspan = colonnespan, row=ligne, sticky= "s" )
 
 
-    def afficheSaisie(self,ligne,colonnespan=2):        
+    def afficheSaisie(self,ligne,colonne=3,colonnespan=2):        
         validatecmd = (self.fenetre.register(OnValidate), '%S', '%P')
         e = Entry(self.frameSelection, validate="key", vcmd=validatecmd,width=6)
-        e.grid(column =3, row=ligne,columnspan = colonnespan,pady = 10, sticky= "n" )
+        e.grid(column =colonne, row=ligne,columnspan = colonnespan,pady = 10, sticky= "n" )
         return e
 
 

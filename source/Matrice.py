@@ -1,10 +1,11 @@
 from tkinter import *
 import random
 
-import sys, os
+import sys, os, platform
 
 ##messagebox:
 from tkinter.messagebox import *
+from tkinter.simpledialog import askinteger
 
 ##ppour ouvrir la fenetre de recherche de fichier
 from tkinter.filedialog import *
@@ -149,6 +150,7 @@ class matrice:
                     self.tab[i][j].setBas(True)
 
 
+####pour l'editeur:
 
     def changeCase(self,event):
         
@@ -205,7 +207,7 @@ class matrice:
                 for i in range(len(self.tabR)):
                     if self.tabR[i].getId() == item[0]:
                         self.f.canvas.delete(item[0])
-                        print("miau")
+                        
                         del self.tabR[i]
                         self.bot = self.bot-1
                         
@@ -230,7 +232,7 @@ class matrice:
                 for i in range(len(self.tabS)):
                     if self.tabS[i].getId() == item[0]:
                         self.f.canvas.delete(item[0])
-                        print("miau")
+                        
                         del self.tabS[i]
                         self.exit =self.exit -1
                         
@@ -297,13 +299,54 @@ class matrice:
                 Id=self.f.placeSortie(self.tabS[-1])
                 self.tabS[-1].setId(Id)
                 self.exit = self.exit+1
-                
 
-        
+
+##    def rouletteUp(self,event=None):
+##        #aggrendit d'une case la matrice
+##        print("miaou")
+##        self.L = self.L+1
+##        
+##            
+##        for i in range(self.l):               
+##            self.tab[i].append(case())
+##
+##        self.l = self.l+1
+##
+##        self.tab.append([])
+##        for j in range (self.L):
+##            self.tab[self.L-1].append(case())
+##
+##
+##        self.f.canvas.destroy() 
+##        self.ajoutBordure()     
+##        self.f.creerCanvas(self.L,self.l, self.tab)
+##
+##        self.placeMur()
+##
+##        self.placeSorties()
+##        self.placeRobots()
+##       
+##        
+##        
+##    def rouletteDown(self,event=None):
+##        #rreduit d'une case la matrice
+##        print("miaou2")
+##                
+##    def roulette(self,event):
+##        print("test")
+##        
+##        if event.delta > 0:
+##            self.rouletteUp()
+##        else:
+##            self.rouletteDown()
+
 
     def editeur(self):
         
         if askyesno("Attention !","effacer la grille actuel ?") or self.tab== [] :            
+
+            taille = askinteger('Taille Matrice', 'entrez la taille de la nouvelle matrice:',initialvalue=10,minvalue=2)
+
             #tableau de robots
             self.tabR=[]
             #la matrice
@@ -316,28 +359,40 @@ class matrice:
             self.bot = 0
             self.exit =0
 
-            self.L = 10
-            self.l = 10
+            self.L = taille
+            self.l = taille
             self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
-
+            
 
             self.f.canvas.destroy() 
             self.ajoutBordure()     
             self.f.creerCanvas(self.L,self.l, self.tab)
-            for i in range((self.L) ):
-                for j in range(self.l):
-                    self.f.placeMur(self.tab[i][j],i,j)
+            
+            self.placeMur()
         
         self.f.canvas.focus_set()
 
         #self.f.canvas.bind("<B1-Motion>", self.changeCase)
 
         self.couleurPipette = "red"
-        
+    
+##
+##        if "Linux" in platform.uname()[0]:
+##            ##pour comptabilité linux (mollette souris):
+##            self.f.canvas.bind("<Button-4>", self.rouletteUp)
+##            self.f.canvas.bind("<Button-5>", self.changeCase)
+##        else:
+##            self.f.canvas.bind("<MouseWheel>", self.roulette)
+
         self.f.canvas.bind("<Button-1>", self.changeCase)
         self.f.canvas.bind("<Button-3>", self.cliqueDroit)
+            
+
+###fin editeur
 
 
+
+###pour initialiser matrice via fichier
 
     #on cree la matri par rapport au fichier fournis
     def creerViaFichier(self):
@@ -388,7 +443,7 @@ class matrice:
                 dicoCouleur[self.fichier[2][i+2]] =self.genererCouleur() 
             
             couleur = dicoCouleur[self.fichier[2][i+2]]
-            print(couleur)
+           
             self.tabS.append(sortie(int(self.fichier[3][i]),int(self.fichier[3][i+1]),couleur))
             self.tab[int(self.fichier[3][i])][int(self.fichier[3][i+1])].setSortie(True)
 
@@ -481,7 +536,7 @@ class matrice:
     def initSortie(self):
         a=0
         couleurDiffRestante = self.getCouleurE()
-        print(self.getCouleurE())
+       
         #copieTab: permet la certitude de tirer une couleur differente
         copieTab = []
         copieTab.extend(self.tabCouleur)
@@ -609,7 +664,7 @@ class matrice:
             
 
             tabRobotMove=self.MoveParRobot(tabDernierMove)
-            print(tabRobotMove)
+            #print(tabRobotMove)
             if tabRobotMove == []:
                 aucuneSolution = True
             else:
@@ -622,7 +677,7 @@ class matrice:
 
                 ##on enlève l'identifiant pour ne pas le tirer au sort ensuite
                 
-                print(direction)
+                #print(direction)
 
                 
 
@@ -654,14 +709,15 @@ class matrice:
                     self.deplaceD()
                     tabDernierMove[numeroR] = "droite"
             
-            print(compteur)
+            
 
             
             compteur=compteur+1
-            print("\n", tabDernierMove,"\n")
+            #print("\n", tabDernierMove,"\n")
 
 
         if aucuneSolution:
+            print("grille non resolvable pour les n coup demander, \n changemant de grille")
             #on réinitialise les tableau
             self.tabR=[]       
             self.tab= []
@@ -777,9 +833,7 @@ class matrice:
   
 
 
-        for i in range(len(self.tabR)):
-            print(self.tabR[i].getX(), " et ",self.tabR[i].getY() )
-            
+
 
         del self.tabPositionInitiale
 
@@ -981,7 +1035,7 @@ class matrice:
                     self.tab[x][y].setRobot( True )
                     self.tabR[i].setY(y)
                     ##modif de l'interface graphique:
-                    print("x = ", x ," et y = ", y)
+                    #print("x = ", x ," et y = ", y)
                     self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))
 
@@ -1009,7 +1063,7 @@ class matrice:
                     self.tab[x][y].setRobot( True )
                     self.tabR[i].setY(y)
                     ##modif de l'interface graphique:
-                    print("x = ", x ," et y = ", y)
+                    #print("x = ", x ," et y = ", y)
                     self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))                
 
@@ -1038,7 +1092,7 @@ class matrice:
                     self.tab[x][y].setRobot( True )
                     self.tabR[i].setX(x)
                     ##modif de l'interface graphique:
-                    print("x = ", x ," et y = ", y)
+                    #print("x = ", x ," et y = ", y)
                     self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))               
 
@@ -1068,7 +1122,7 @@ class matrice:
                     self.tab[x][y].setRobot( True )
                     self.tabR[i].setX(x)
                     ##modif de l'interface graphique:
-                    print("x = ", x ," et y = ", y)
+                    #print("x = ", x ," et y = ", y)
                     self.f.canvas.coords(self.tabR[i].getId(),x*self.f.tailleCase+(self.f.tailleCase/10),y*self.f.tailleCase+(self.f.tailleCase/10),
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))               
 
@@ -1128,17 +1182,25 @@ def reset():
             infoRicochet.append(2)
         else:   
             infoRicochet.append(int(f.recupInfo[i].get()))
-    
+    if f.recupInfo[-3].get() == "" or int(f.recupInfo[-3].get()) <= 0:
+        hauteur= 10        
+    else:
+        hauteur=int(f.recupInfo[-3].get())
+        
+    if f.recupInfo[-2].get() == "" or int(f.recupInfo[-2].get()) <= 0:
+        largeur= 10
+    else:      
+        largeur=int(f.recupInfo[-2].get())
     
     if f.resolve.get()==1:
         ##récup le dernier élémet de la liste
         if f.recupInfo[-1].get() != "":
-            tableau=matrice(10,10,37,infoRicochet, True,int(f.recupInfo[-1].get()))
+            tableau=matrice(hauteur,largeur,37,infoRicochet, True,int(f.recupInfo[-1].get()))
 
         else:
-            tableau=matrice(10,10,37,infoRicochet, True)
+            tableau=matrice(hauteur,largeur,37,infoRicochet, True)
     else:
-        tableau=matrice(10,10,37,infoRicochet)
+        tableau=matrice(hauteur,largeur,37,infoRicochet)
 
 
     ##l'encienne grille n'est plus référencer et est donc supprimé automatiquement
@@ -1151,7 +1213,7 @@ def reset():
     
 def boutonSelection():
     bouton=Button(f.frameSelection, text="Valider", command=reset)
-    bouton.grid(column =4,rowspan=3, row=9) #, sticky= "c" )
+    bouton.grid(column =4,rowspan=3, row=12) #, sticky= "c" )
 
 ##fonction pour les zones d'edition
 
@@ -1165,6 +1227,9 @@ def quitteEditeur():
     f.frameSelection.grid_propagate(0)
 
     f.canvas.unbind("<Button-3>")
+    f.canvas.unbind("<Button-4>")
+    f.canvas.unbind("<Button-5>")
+    f.canvas.unbind("<MouseWheel>")
 
 
     #on lance la partie
@@ -1181,57 +1246,69 @@ def boutonEdition():
 ###fonction de sauvegarde et de chargement:   
     
 def sauvegarder():
-    global tableau
-    print(tableau)
-    if tableau != None:
-        print("sauvegarde !")
-        numero=0
-        while os.path.isfile("Saves/save("+str(numero)+").ri"):
-            numero=numero+1;
+    print("lancement de la sauvegarde...")
+
+    ##pour prevenir une erreur de sauvegarde
+    try:
         
-        nomF="Saves/save("+str(numero)+").ri"
+        global tableau
+        print(tableau)
+        if tableau != None:
+
+            
+            
+            numero=0
+            while os.path.isfile("Saves/save("+str(numero)+").ri"):
+                numero=numero+1;
+            
+            nomF="Saves/save("+str(numero)+").ri"
 
 
+            
+            with open(nomF,"w") as fichier:
         
-        with open(nomF,"w") as fichier:
-    
-            #print(fichier.read())
-            #print("%s,%s;" % (tableau.L, tableau.l))
-            
-            fichier.write("%s,%s;" % (tableau.L, tableau.l))
-            fichier.write("\n\n")
-            for j in range(tableau.l):
-                for i in range(tableau.L):
-                    donnee=","
-                    if tableau.tab[i][j].getHaut():
-                        donnee="h"+donnee
-                    if tableau.tab[i][j].getBas():
-                        donnee="b"+donnee
-                    if tableau.tab[i][j].getDroite():
-                        donnee="d"+donnee
-                    if tableau.tab[i][j].getGauche():
-                        donnee="g"+donnee
-                    
-                    fichier.write(donnee)
-                fichier.write("\n")
-            fichier.write("\n;")
-            
-            ##besoin de créer un nouveau dico de couleur
-                ##car lors de la création nous avons utilisé 2méthode différente
-                ##suivant si on genere la grille a l'aide d'un fichier ou non
-            dicoCouleur={}
-            for k in range(len(tableau.tabCouleur)):
-                dicoCouleur[tableau.tabCouleur[k]]=k
-            
-            for r in range(tableau.bot):
-                fichier.write("%s,%s,%s\n," % (tableau.tabR[r].getX(),
-                                          tableau.tabR[r].getY() ,
-                                          dicoCouleur[tableau.tabR[r].getCouleur()] ))
-            fichier.write("\n;")
-            for s in range(tableau.exit):                    
-               fichier.write("%s,%s,%s\n," % (tableau.tabS[s].getX(),
-                                             tableau.tabS[s].getY() ,
-                                             dicoCouleur[tableau.tabS[s].getCouleur()] ))
+                #print(fichier.read())
+                #print("%s,%s;" % (tableau.L, tableau.l))
+                
+                fichier.write("%s,%s;" % (tableau.L, tableau.l))
+                fichier.write("\n\n")
+                for j in range(tableau.l):
+                    for i in range(tableau.L):
+                        donnee=","
+                        if tableau.tab[i][j].getHaut():
+                            donnee="h"+donnee
+                        if tableau.tab[i][j].getBas():
+                            donnee="b"+donnee
+                        if tableau.tab[i][j].getDroite():
+                            donnee="d"+donnee
+                        if tableau.tab[i][j].getGauche():
+                            donnee="g"+donnee
+                        
+                        fichier.write(donnee)
+                    fichier.write("\n")
+                fichier.write("\n;")
+                
+                ##besoin de créer un nouveau dico de couleur
+                    ##car lors de la création nous avons utilisé 2méthode différente
+                    ##suivant si on genere la grille a l'aide d'un fichier ou non
+                dicoCouleur={}
+                for k in range(len(tableau.tabCouleur)):
+                    dicoCouleur[tableau.tabCouleur[k]]=k
+                
+                for r in range(tableau.bot):
+                    fichier.write("%s,%s,%s\n," % (tableau.tabR[r].getX(),
+                                              tableau.tabR[r].getY() ,
+                                              dicoCouleur[tableau.tabR[r].getCouleur()] ))
+                fichier.write("\n;")
+                for s in range(tableau.exit):                    
+                   fichier.write("%s,%s,%s\n," % (tableau.tabS[s].getX(),
+                                                 tableau.tabS[s].getY() ,
+                                                 dicoCouleur[tableau.tabS[s].getCouleur()] ))
+            print("sauvegarde réussi !")
+    except:
+        print("\n\nerreur survenue lors de la sauvegarde \n(partie non sauvegarde/fichier corrompu)\n\n")
+
+        
 
 ##ouvre le fichier, le split et l'envoie a la classe tableau
 def chargerFichier(file):
