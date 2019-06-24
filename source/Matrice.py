@@ -18,7 +18,6 @@ from Robot import *
 from Sortie import *
 from Interface import *
 
-
 ##le fichier Matrice fais office de fichier principale, c'est celui
 ##qui sera executé pour lancer l'application.
 
@@ -45,7 +44,7 @@ class matrice:
     #tableau contenant toute les couleurs utilisé: tabCouleur
 
     ##constructeur
-    def __init__(self, longueur=10, largeur=10, densite=60, infoRicochet=[2,2,2,2],
+    def __init__(self, longueur=10, largeur=10, densite=50, infoRicochet=[2,2,2,2],
                  solvable = False,mouvement=10, fichier= None,edition=False):
 
         ##on lie l'interface a l'objet
@@ -935,7 +934,7 @@ class matrice:
             elif(   coords[2] <= x  and  coords[1] <= y <= coords[3]):
                 self.deplaceD()                
 
-            
+            self.verifAllSortie()
             selection = False
 
                
@@ -1040,7 +1039,8 @@ class matrice:
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))
 
                     ##on verifie si une sortie a été atteinte
-                    self.verifSortie(i,x,y)     
+                    #self.verifSortie(i,x,y)
+                    
 
     def deplaceB(self):        
         global lastItem
@@ -1068,8 +1068,9 @@ class matrice:
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))                
 
                     ##on verifie si une sortie a été atteinte
-                    self.verifSortie(i,x,y)     
-        
+                    #self.verifSortie(i,x,y)     
+                    
+                    
     def deplaceG(self):        
         global lastItem
         global move
@@ -1097,8 +1098,9 @@ class matrice:
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))               
 
                     ##on verifie si une sortie a été atteinte
-                    self.verifSortie(i,x,y)     
-             
+                    #self.verifSortie(i,x,y)     
+                   
+                    
     def deplaceD(self):        
         global lastItem
         global move
@@ -1127,46 +1129,193 @@ class matrice:
                                  x*self.f.tailleCase+(self.f.tailleCase/10*9),y*self.f.tailleCase+(self.f.tailleCase/10*9))               
 
                     ##on verifie si une sortie a été atteinte
-                    self.verifSortie(i,x,y)           
+                    #self.verifSortie(i,x,y)           
+                    
+
 
     def verifSortie(self,i,x,y):
-        global gagner
+        #global gagner
       
                     
         if self.tab[x][y].getSortie():
-            print("miaou")
 
             for j in range(self.getSortie()):
-                print("x = ", self.tabS[j].getX() ," et y = ", self.tabS[j].getY())
+                #print("x = ", self.tabS[j].getX() ," et y = ", self.tabS[j].getY())
                     
                 if self.tabS[j].getX()==x and self.tabS[j].getY() == y:
-                    print("couleur tabR:  ",self.tabR[i].getCouleur(),"couleur tabS: ",self.tabS[j].getCouleur())
-                    
                     if self.tabR[i].getCouleur() == self.tabS[j].getCouleur():
-
-                        #self.pause()
+                        print("couleur",self.tabR[i].getCouleur()," et", self.tabS[j].getCouleur())
                         global move
                         print("     vous avez gagner en ",move," coup     ")
                         self.f.labelGagner(move)
                         gagner = True
-                        
-                        
-
-    def genererCouleur(self):
-        rouge = format(randint(20,255), '02x')
-        vert =  format(randint(20,255), '02x')
-        bleu =  format(randint(0,150), '02x')
-        return '#'+ rouge + vert + bleu
+                        return True
+        return False
 
 
-    def pause(self):
-        global pause
-        if not pause:
-            self.f.canvas.unbind("<Button-1>",)
-            pause = True
+    def verifAllSortie(self):
+        global gagner
+        global move
+        sortieRestante=list(self.tabS)
+
+        for i in range(len(self.tabR)):
+            
+            for j in range(len(sortieRestante)-1,-1,-1):
+                print(j)
+                if (self.tabR[i].getX()==sortieRestante[j].getX() and
+                    self.tabR[i].getY()==sortieRestante[j].getY()):
+                    del sortieRestante[j]
+
+
+        if len(sortieRestante) ==0:
+            print("     vous avez gagner en ",move," coup     ")
+            self.f.labelGagner(move)
+            gagner = True
+            return True
         else:
-            self.f.canvas.bind("<Button-1>", self.clique)
-            pause = False
+            return False
+           
+            
+                        
+                        
+
+    def genererCouleur(self, r = None,v = None,b = None,biai=1):
+        if r == None:
+            rouge = format(randint(20,255), '02x')
+        else:
+            rouge = format((r+50*biai)%255, '02x')
+            
+        if v == None:
+            vert =  format(randint(20,255), '02x')
+        else:
+            vert = format((v+50*biai)%255, '02x')
+        
+        if b == None:
+            bleu =  format(randint(0,150), '02x')
+        else:
+            bleu = format(abs((b-50*biai)%255), '02x')
+        return '#'+ rouge + vert + bleu
+##
+##
+##    def pause(self):
+##        global pause
+##        if not pause:
+##            self.f.canvas.unbind("<Button-1>",)
+##            pause = True
+##        else:
+##            self.f.canvas.bind("<Button-1>", self.clique)
+##            pause = False
+
+
+    def traceChemin(self,chemin,biai=0):
+        couleur=self.genererCouleur(46,147,249,biai)
+        
+        for i in range(len(chemin)):
+            self.f.canvas.itemconfigure(self.tab[chemin[i][0]][chemin[i][1]].getId(),fill=couleur)
+            if i< ( len(chemin)-1):
+                depart= min(chemin[i][0], chemin[i+1][0])
+                fin = max(chemin[i][0], chemin[i+1][0])
+
+                for x in range(depart, fin):
+                    self.f.canvas.itemconfigure(self.tab[x][chemin[i][1]].getId(),fill=couleur)
+                
+                depart= min(chemin[i][1], chemin[i+1][1])
+                fin = max(chemin[i][1], chemin[i+1][1])
+                for y in range(depart, fin):
+                    self.f.canvas.itemconfigure(self.tab[chemin[i][0]][y].getId(),fill=couleur)
+
+                  
+    
+
+
+    ##fonctionne avec 1 robot seulement
+    def resFile(self):
+        for bot in range(len(self.tabR)):
+                
+            dejaVue = [[-1 for x in range(self.l)] for y in range(self.L)]
+            resolv=False
+            
+            file=[]
+            file.append((self.tabR[bot].getX(), self.tabR[bot].getY()))
+            dejaVue[file[0][0]][file[0][1]]=0#(file[0][0],file[0][1])
+
+            ##on enleve les coordonnées de la balle pour qu'elle ne puisse pas ricochet sur elle meme
+            #on met donc la valeur en négatif
+            self.tab[self.tabR[bot].getX()][self.tabR[bot].getY()].setRobot(False)
+            
+            
+            while len(file) > 0 and (not resolv):
+
+                
+                #print(file, resolv)
+                if self.verifSortie(bot,file[0][0], file[0][1]):
+                    print("pour le robot numero ", bot, ", grille resolvable")
+                    resolv=True
+                
+                else:
+                    haut = self.movePossibleH(file[0][0],file[0][1])
+                    if haut > 0 and dejaVue[file[0][0]][file[0][1]-haut]==-1:
+                        file.append( (file[0][0],file[0][1]-haut ) )
+                        dejaVue[file[0][0]][file[0][1]-haut]=(file[0][0],file[0][1])
+                        
+                    bas = self.movePossibleB(file[0][0],file[0][1])
+                    if bas > 0 and dejaVue[file[0][0]][file[0][1]+bas]==-1:
+                        file.append( (file[0][0],file[0][1]+bas ) )
+                        dejaVue[file[0][0]][file[0][1]+bas]=(file[0][0],file[0][1])
+
+                    gauche = self.movePossibleG(file[0][0],file[0][1])
+                    if gauche > 0 and dejaVue[file[0][0]-gauche][file[0][1]]==-1:
+                        file.append( (file[0][0]-gauche,file[0][1] ) )
+                        dejaVue[file[0][0]-gauche][file[0][1]]=(file[0][0],file[0][1])
+
+                    droite = self.movePossibleD(file[0][0],file[0][1])
+                    if droite > 0 and dejaVue[file[0][0]+droite][file[0][1]]==-1:
+                        file.append( (file[0][0]+droite,file[0][1]) )
+                        dejaVue[file[0][0]+droite][file[0][1]]=(file[0][0],file[0][1])
+                        
+
+                    del file[0]
+
+            #print(dejaVue)
+            self.tab[self.tabR[bot].getX()][self.tabR[bot].getY()].setRobot(True)
+
+            
+            chemin = []
+            if resolv:
+                
+                chemin.append((file[0][0], file[0][1]))
+                position=(file[0][0], file[0][1])
+                while dejaVue[position[0]][position[1]]  != 0:
+                    
+                    chemin.append(dejaVue[position[0]][position[1]])
+                    position = dejaVue[position[0]][position[1]]                                   
+                                          
+
+                    self.traceChemin(chemin,biai=bot)
+            else:
+                print("pour le robot numero ", bot, ", grille non resolvable")
+
+        
+                              
+
+        
+        
+
+#####FIN MATRICE ######
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             
 
@@ -1175,6 +1324,12 @@ class matrice:
 
 def reset():
     print("reset")
+    
+    
+    global tableau
+##    if tableau == None:
+##        matrice.__delete__(tableau)
+
     
     infoRicochet=[]
     for i in range(len(f.recupInfo)-1):
@@ -1264,7 +1419,7 @@ def sauvegarder():
             nomF="Saves/save("+str(numero)+").ri"
 
 
-            
+           
             with open(nomF,"w") as fichier:
         
                 #print(fichier.read())
@@ -1313,15 +1468,20 @@ def sauvegarder():
 ##ouvre le fichier, le split et l'envoie a la classe tableau
 def chargerFichier(file):
     #pour evitez certaines erreurs:
-    with open(file,"r") as fichier:   
+    try:
+        global tableau
+        with open(file,"r") as fichier:   
 
-        contenu=fichier.read()
-        ##on sépare les information (entête, info matrice, robot, sortie)
-        contenu = contenu.split(";")
-        ##puis on sépare chaque éléments
-        for i in range(len(contenu)):
-            contenu[i] = contenu[i].split(",")
-        tableau=matrice(fichier = contenu)
+            contenu=fichier.read()
+            ##on sépare les information (entête, info matrice, robot, sortie)
+            contenu = contenu.split(";")
+            ##puis on sépare chaque éléments
+            for i in range(len(contenu)):
+                contenu[i] = contenu[i].split(",")
+            tableau=matrice(fichier = contenu)
+
+    except FileNotFoundError:
+        print("nom fichier invalide")
 
 
 
@@ -1352,6 +1512,16 @@ def menuCharger():
     chargerFichier(filename)
 
 
+def menuResolution():
+    #try:
+        global tableau
+        #if tableau.getRobot()==1:
+        tableau.resFile()
+
+   # except:
+   #     print("une erreur est survenu, impossible de resoudre")
+        
+    
 
 
 
@@ -1401,7 +1571,7 @@ boutonEdition()
 ####
 
 #nbRobot, nbCouleurRobot, nbSortie, nbcouleurSortie
-infoRicochet=[2,2,2,2]
+infoRicochet=[1,1,1,1]
 
 ##si in fichier est passer en paramètre
 ##organisation du fichier: [longueur,largeur,hb, gd, etc... 
@@ -1413,9 +1583,11 @@ if len(sys.argv) == 2:
 
 #par défault
 else:      
-    tableau=matrice(20,20,40,infoRicochet, solvable = True)
+    tableau=matrice(20,20,40,infoRicochet, solvable = True,mouvement = 30)
     #reset()
 
+
+#tableau.resFile()
 
 
 
@@ -1431,6 +1603,10 @@ menu1.add_command(label="Charger", command=menuCharger)
 menu1.add_separator()
 menu1.add_command(label="Mode Edition", command=edition)
 menubar.add_cascade(label="Fichier", menu=menu1)
+
+menu2 = Menu(menubar, tearoff=0)
+menu2.add_command(label="resolution Grille", command=menuResolution)
+menubar.add_cascade(label="resolution", menu=menu2)
 f.fenetre.config(menu=menubar)
 
 

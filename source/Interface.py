@@ -70,6 +70,9 @@ class interface:
 
 
 
+
+
+
     def creerLabelNbMove(self):
         self.phrase = Label(self.fenetre, text="Nombres de déplacements: ",font=20)
         self.phrase.grid(column =2, row=0, sticky= "e" )
