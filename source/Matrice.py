@@ -218,6 +218,7 @@ class matrice:
                 
                 self.tab[x][y].setRobot(True)
                 self.couleurPipette=self.genererCouleur()
+                self.tabCouleur.append(self.couleurPipette)
                 self.tabR.append(robot(x,y,self.couleurPipette))
                 Id=self.f.placeRobot(self.tabR[-1])
                 self.tabR[-1].setId(Id)
@@ -243,6 +244,7 @@ class matrice:
                 
                 self.tab[x][y].setSortie(True)
                 self.couleurPipette=self.genererCouleur()
+                self.tabCouleur.append(self.couleurPipette)
                 self.tabS.append(sortie(x,y,self.couleurPipette))
                 Id=self.f.placeSortie(self.tabS[-1])
                 self.tabS[-1].setId(Id)
@@ -300,46 +302,6 @@ class matrice:
                 self.exit = self.exit+1
 
 
-##    def rouletteUp(self,event=None):
-##        #aggrendit d'une case la matrice
-##        print("miaou")
-##        self.L = self.L+1
-##        
-##            
-##        for i in range(self.l):               
-##            self.tab[i].append(case())
-##
-##        self.l = self.l+1
-##
-##        self.tab.append([])
-##        for j in range (self.L):
-##            self.tab[self.L-1].append(case())
-##
-##
-##        self.f.canvas.destroy() 
-##        self.ajoutBordure()     
-##        self.f.creerCanvas(self.L,self.l, self.tab)
-##
-##        self.placeMur()
-##
-##        self.placeSorties()
-##        self.placeRobots()
-##       
-##        
-##        
-##    def rouletteDown(self,event=None):
-##        #rreduit d'une case la matrice
-##        print("miaou2")
-##                
-##    def roulette(self,event):
-##        print("test")
-##        
-##        if event.delta > 0:
-##            self.rouletteUp()
-##        else:
-##            self.rouletteDown()
-
-
     def editeur(self):
         
         if askyesno("Attention !","effacer la grille actuel ?") or self.tab== [] :            
@@ -374,6 +336,7 @@ class matrice:
         #self.f.canvas.bind("<B1-Motion>", self.changeCase)
 
         self.couleurPipette = "red"
+        self.tabCouleur.append("red")
     
 ##
 ##        if "Linux" in platform.uname()[0]:
@@ -453,6 +416,57 @@ class matrice:
 
 
 
+    def listeCoup(self,fichier):
+        print("aaaaa")
+        print(fichier)
+        fichier = list(fichier)
+        print(fichier)
+        dicoListeC={}
+
+        for k in range(0,self.bot):
+
+            dicoListeC[k] = []
+            dicoListeC[k].append((self.tabR[k].getX(),self.tabR[k].getY()))
+
+        print(dicoListeC)
+
+
+        
+        for i in range(0,len(fichier),2):
+            print(fichier[i])
+            if int(fichier[i])<self.bot:
+          
+                   
+
+                if "g" in fichier[i+1]:
+                    gauche = self.deplaceG(Id=self.tabR[int(fichier[i])].getId())
+                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0]-gauche, dicoListeC[int(fichier[i])][-1][1])  )
+                        
+                if "d" in fichier[i+1]:
+                    droite = self.deplaceD(Id=self.tabR[int(fichier[i])].getId())
+                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0]+droite, dicoListeC[int(fichier[i])][-1][1])  )
+                       
+                if "h" in fichier[i+1]:
+                    haut= self.deplaceH(Id=self.tabR[int(fichier[i])].getId())
+                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0], dicoListeC[int(fichier[i])][-1][1]-haut)  )
+                       
+                if "b" in fichier[i+1]:
+                    bas= self.deplaceB(Id=self.tabR[int(fichier[i])].getId())
+                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0], dicoListeC[int(fichier[i])][-1][1]+bas ) )
+                   
+
+        print(dicoListeC)
+
+
+
+
+
+
+
+
+
+
+        
 
 
 
@@ -716,7 +730,7 @@ class matrice:
 
 
         if aucuneSolution:
-            print("grille non resolvable pour les n coup demander, \n changemant de grille")
+            print("grille généré non solvable pour les n coup demander, \n changemant de grille")
             #on réinitialise les tableau
             self.tabR=[]       
             self.tab= []
@@ -1011,8 +1025,10 @@ class matrice:
 
  
     
-    def deplaceH(self):        
+    def deplaceH(self,Id=None):
         global lastItem
+        if Id != None:
+            lastItem = (Id,)
         global move
         for i in range(self.getRobot()):
             if self.tabR[i].getId() == lastItem[0]:
@@ -1040,10 +1056,15 @@ class matrice:
 
                     ##on verifie si une sortie a été atteinte
                     #self.verifSortie(i,x,y)
+                    return compteur
+                else:
+                    return 0
                     
 
-    def deplaceB(self):        
+    def deplaceB(self,Id=None):
         global lastItem
+        if Id != None:
+            lastItem = (Id,)
         global move
         for i in range(self.getRobot()):
             if self.tabR[i].getId() == lastItem[0]:
@@ -1069,10 +1090,14 @@ class matrice:
 
                     ##on verifie si une sortie a été atteinte
                     #self.verifSortie(i,x,y)     
+                    return compteur
+                else:
+                    return 0                    
                     
-                    
-    def deplaceG(self):        
+    def deplaceG(self,Id=None):
         global lastItem
+        if Id != None:
+            lastItem = (Id,)
         global move
         for i in range(self.getRobot()):
             if self.tabR[i].getId() == lastItem[0]:
@@ -1099,10 +1124,14 @@ class matrice:
 
                     ##on verifie si une sortie a été atteinte
                     #self.verifSortie(i,x,y)     
-                   
+                    return compteur
+                else:
+                    return 0                   
                     
-    def deplaceD(self):        
+    def deplaceD(self,Id=None):
         global lastItem
+        if Id != None:
+            lastItem = (Id,)
         global move
         for i in range(self.getRobot()):
             if self.tabR[i].getId() == lastItem[0]:
@@ -1131,7 +1160,9 @@ class matrice:
                     ##on verifie si une sortie a été atteinte
                     #self.verifSortie(i,x,y)           
                     
-
+                    return compteur
+                else:
+                    return 0
 
     def verifSortie(self,i,x,y):
         #global gagner
@@ -1405,7 +1436,7 @@ def sauvegarder():
 
     ##pour prevenir une erreur de sauvegarde
     try:
-        
+    
         global tableau
         print(tableau)
         if tableau != None:
@@ -1483,7 +1514,17 @@ def chargerFichier(file):
     except FileNotFoundError:
         print("nom fichier invalide")
 
+def chargerListeCoup(file):
+    try:
+        global tableau
+        with open(file,"r") as fichier:
+            fichier = fichier.read()
+            
+            tableau.listeCoup(fichier)
 
+    except FileNotFoundError:
+        print("nom fichier invalide")
+    
 
                    
 ##initialise le mode édition
@@ -1510,6 +1551,12 @@ def edition():
 def menuCharger():
     filename = askopenfilename(title="Charger la sauvegarde",filetypes=[('Ri files', '*.ri'),('txt files','.txt'),('all files','.*')])    
     chargerFichier(filename)
+
+##ouvre la fenetre de dialogue pour charger une liste de coup
+def menuListeCoup():
+    filename = askopenfilename(title="Charger la liste de coup",filetypes=[('lc files', '*.lc'),('txt files','.txt'),('all files','.*')])    
+    chargerListeCoup(filename)
+
 
 
 def menuResolution():
@@ -1599,7 +1646,8 @@ menu1.add_command(label="Commencer", command=reset)
 #if tableau !=None:
  #   menu1.add_command(label="pause", command=tableau.pause)
 menu1.add_command(label="Sauvegarder", command=sauvegarder)
-menu1.add_command(label="Charger", command=menuCharger)
+menu1.add_command(label="Charger une grille", command=menuCharger)
+menu1.add_command(label="Charger une liste de coup", command=menuListeCoup)
 menu1.add_separator()
 menu1.add_command(label="Mode Edition", command=edition)
 menubar.add_cascade(label="Fichier", menu=menu1)
