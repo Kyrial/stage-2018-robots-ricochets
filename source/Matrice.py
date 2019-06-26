@@ -429,8 +429,6 @@ class matrice:
             dicoListeC[k].append((self.tabR[k].getX(),self.tabR[k].getY()))
 
         print(dicoListeC)
-
-
         
         for i in range(0,len(fichier),2):
             print(fichier[i])
@@ -456,6 +454,8 @@ class matrice:
                    
 
         print(dicoListeC)
+        for i in range(len(dicoListeC)):
+            self.traceChemin(dicoListeC[i],i)
 
 
 
