@@ -1,7 +1,7 @@
 from tkinter import *
 import random
 
-import sys, os, platform
+import sys, os, platform, time
 
 ##messagebox:
 from tkinter.messagebox import *
@@ -417,10 +417,9 @@ class matrice:
 
 
     def listeCoup(self,fichier):
-        print("aaaaa")
-        print(fichier)
+       
+      
         fichier = list(fichier)
-        print(fichier)
         dicoListeC={}
 
         for k in range(0,self.bot):
@@ -438,20 +437,39 @@ class matrice:
 
                 if "g" in fichier[i+1]:
                     gauche = self.deplaceG(Id=self.tabR[int(fichier[i])].getId())
-                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0]-gauche, dicoListeC[int(fichier[i])][-1][1])  )
-                        
+                    if gauche >0:
+                        dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0]-gauche, dicoListeC[int(fichier[i])][-1][1])  )
+                    else:
+             
+                        self.f.canvas.itemconfigure(str(self.tab[dicoListeC[int(fichier[i])][-1][0]]
+                                                        [dicoListeC[int(fichier[i])][-1][1]].getId())+"g", fill = "red")
+
+                                            
                 if "d" in fichier[i+1]:
                     droite = self.deplaceD(Id=self.tabR[int(fichier[i])].getId())
-                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0]+droite, dicoListeC[int(fichier[i])][-1][1])  )
-                       
+                    if droite >0:
+                        dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0]+droite, dicoListeC[int(fichier[i])][-1][1])  )
+                    else:
+                        self.f.canvas.itemconfigure(str(self.tab[dicoListeC[int(fichier[i])][-1][0]]
+                                                        [dicoListeC[int(fichier[i])][-1][1]].getId())+"d", fill = "red")
+
+
                 if "h" in fichier[i+1]:
                     haut= self.deplaceH(Id=self.tabR[int(fichier[i])].getId())
-                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0], dicoListeC[int(fichier[i])][-1][1]-haut)  )
+                    if haut >0:
+                        dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0], dicoListeC[int(fichier[i])][-1][1]-haut)  )
+                    else:
+                        self.f.canvas.itemconfigure(str(self.tab[dicoListeC[int(fichier[i])][-1][0]]
+                                                        [dicoListeC[int(fichier[i])][-1][1]].getId())+"h", fill = "red")
+
                        
                 if "b" in fichier[i+1]:
                     bas= self.deplaceB(Id=self.tabR[int(fichier[i])].getId())
-                    dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0], dicoListeC[int(fichier[i])][-1][1]+bas ) )
-                   
+                    if bas >0:
+                        dicoListeC[int(fichier[i])].append( (dicoListeC[int(fichier[i])][-1][0], dicoListeC[int(fichier[i])][-1][1]+bas ) )
+                    else:
+                        self.f.canvas.itemconfigure(str(self.tab[dicoListeC[int(fichier[i])][-1][0]]
+                                                        [dicoListeC[int(fichier[i])][-1][1]].getId())+"b", fill = "red")
 
         print(dicoListeC)
         for i in range(len(dicoListeC)):
@@ -467,6 +485,10 @@ class matrice:
 
 
         
+
+
+
+
 
 
 
@@ -904,6 +926,11 @@ class matrice:
                 
                 
 ####fin initialisation partie            
+
+
+
+
+
             
 ####debut partie:
 
@@ -1243,17 +1270,24 @@ class matrice:
         
         for i in range(len(chemin)):
             self.f.canvas.itemconfigure(self.tab[chemin[i][0]][chemin[i][1]].getId(),fill=couleur)
-            if i< ( len(chemin)-1):
-                depart= min(chemin[i][0], chemin[i+1][0])
-                fin = max(chemin[i][0], chemin[i+1][0])
 
-                for x in range(depart, fin):
-                    self.f.canvas.itemconfigure(self.tab[x][chemin[i][1]].getId(),fill=couleur)
-                
-                depart= min(chemin[i][1], chemin[i+1][1])
-                fin = max(chemin[i][1], chemin[i+1][1])
-                for y in range(depart, fin):
-                    self.f.canvas.itemconfigure(self.tab[chemin[i][0]][y].getId(),fill=couleur)
+            if i< ( len(chemin)-1):
+
+                ##dans le cas où le robot n'a pas bougé (utile lors de lecture de coup)
+                if chemin[i] == chemin[i+1]:
+                    print("attention")
+                else:
+                    
+                    depart= min(chemin[i][0], chemin[i+1][0])
+                    fin = max(chemin[i][0], chemin[i+1][0])
+
+                    for x in range(depart, fin):
+                        self.f.canvas.itemconfigure(self.tab[x][chemin[i][1]].getId(),fill=couleur)
+                    
+                    depart= min(chemin[i][1], chemin[i+1][1])
+                    fin = max(chemin[i][1], chemin[i+1][1])
+                    for y in range(depart, fin):
+                        self.f.canvas.itemconfigure(self.tab[chemin[i][0]][y].getId(),fill=couleur)
 
                   
     
@@ -1273,8 +1307,9 @@ class matrice:
             ##on enleve les coordonnées de la balle pour qu'elle ne puisse pas ricochet sur elle meme
             #on met donc la valeur en négatif
             self.tab[self.tabR[bot].getX()][self.tabR[bot].getY()].setRobot(False)
-            
-            
+
+            ##pour calculer le temps d'execution:
+            debut = time.time()
             while len(file) > 0 and (not resolv):
 
                 
@@ -1306,6 +1341,10 @@ class matrice:
                         
 
                     del file[0]
+
+            fin = time.time()
+
+            print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
 
             #print(dejaVue)
             self.tab[self.tabR[bot].getX()][self.tabR[bot].getY()].setRobot(True)
