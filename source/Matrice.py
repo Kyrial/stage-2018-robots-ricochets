@@ -45,7 +45,9 @@ class matrice:
 
     ##constructeur
     def __init__(self, longueur=10, largeur=10, densite=50, infoRicochet=[2,2,2,2],
-                 solvable = False,mouvement=10, fichier= None,edition=False):
+                 solvable = False,mouvement=10, fichier= None
+                 ,mode=None):
+                
 
         ##on lie l'interface a l'objet
         global f
@@ -66,8 +68,18 @@ class matrice:
 
         self.reinitialise()
 
-        if edition:
+        if mode == "edition":
             self.editeur()
+
+        if mode == "ricochet":
+            print("creation ricochet")
+            self.L = 16
+            self.l = 16            
+            self.bot = 4            
+            self.colorR = 4
+            self.exit = 1
+            self.colorE = 1
+            self.plateauRicochet()
 
         
         elif fichier ==None:
@@ -88,7 +100,7 @@ class matrice:
             self.creerTab()
 
         else:
-            print(fichier)
+            #print(fichier)
             self.fichier = fichier
             self.creerViaFichier()
             
@@ -149,7 +161,75 @@ class matrice:
                     self.tab[i][j].setBas(True)
 
 
-####pour l'editeur:
+####DEBUT CONSTRUCTION PLATEAU AVEC PLATEAU RICOCHET####
+
+    def plateauRicochet(self):
+
+        self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
+            
+        self.ajoutBordure()       
+        self.f.creerCanvas(self.L,self.l, self.tab)
+
+        self.ricochetQuartier(0,0)
+        self.ricochetQuartier(1,0)
+        self.ricochetQuartier(0,1)
+        self.ricochetQuartier(1,1)
+
+
+        
+        self.placeMur()
+
+    def ricochetQuartier(self,x,y):
+        self.ricochetCarreCentrale(x,y)
+        self.murRicochet(x,y)
+        self.murAngle(x,y)        
+      
+
+    def ricochetCarreCentrale(self,x,y):
+        
+        self.tab[7+(2*x)][7+(y)].setGauche(True)
+        self.tab[7+(x)][7+(2*y)].setHaut(True)
+        
+        
+
+    def murRicochet(self,x,y):
+
+        self.tab[randint(1,6)+(x*7)][0+(y*15)].setDroite(True)
+        self.tab[0+(x*15)][randint(1,6)+(y*7)].setBas(True)
+    
+
+    def murAngle(self,x,y):
+        positionLibre=[[0 for x in range(8)] for y in range(8)]
+        
+        for i in range(0,2):
+            for j in range(0,2):
+                while True:
+                    newX=randint(1,6)+(x*7)
+                    newY=randint(1,6)+(y*7)
+                    if positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0:
+                        break
+                
+                self.tab[newX+i][newY].setBas(True)
+                self.tab[newX][newY+j].setDroite(True)
+
+                positionLibre[newX-(x*7)+((i-1)*(-1))][newY-(y*7)+((j-1)*(-1))]=1
+                for k in range(8):
+                    positionLibre[newX-(x*7)+i][k]=1
+                    positionLibre[k][newY-(y*7)+j]=1
+
+        for q in range(8):
+            print( positionLibre[q])
+        print("\n")
+        
+
+
+####FIN RICOCHET PLATEAU ###
+
+
+
+
+
+####DEBUT EDITEUR####
 
     def changeCase(self,event):
         
@@ -350,7 +430,7 @@ class matrice:
         self.f.canvas.bind("<Button-3>", self.cliqueDroit)
             
 
-###fin editeur
+####FIN EDITEUR####
 
 
 
@@ -427,10 +507,10 @@ class matrice:
             dicoListeC[k] = []
             dicoListeC[k].append((self.tabR[k].getX(),self.tabR[k].getY()))
 
-        print(dicoListeC)
+        
         
         for i in range(0,len(fichier),2):
-            print(fichier[i])
+            
             if int(fichier[i])<self.bot:
           
                    
@@ -471,8 +551,9 @@ class matrice:
                         self.f.canvas.itemconfigure(str(self.tab[dicoListeC[int(fichier[i])][-1][0]]
                                                         [dicoListeC[int(fichier[i])][-1][1]].getId())+"b", fill = "red")
 
-        print(dicoListeC)
+        #print(dicoListeC)
         for i in range(len(dicoListeC)):
+            dicoListeC[i].reverse()            
             self.traceChemin(dicoListeC[i],i)
 
 
@@ -964,7 +1045,7 @@ class matrice:
         else:
             print("coords :",self.f.canvas.coords(lastItem))
             coords = self.f.canvas.coords(lastItem)
-            print("x = ", x ," et y = ", y)
+            
             self.afficheMoveCase(False)
             if( coords[0] <= x <=  coords[2]  and y <= coords[1]):                
                 self.deplaceH()
@@ -1202,11 +1283,10 @@ class matrice:
                     
                 if self.tabS[j].getX()==x and self.tabS[j].getY() == y:
                     if self.tabR[i].getCouleur() == self.tabS[j].getCouleur():
-                        print("couleur",self.tabR[i].getCouleur()," et", self.tabS[j].getCouleur())
-                        global move
-                        print("     vous avez gagner en ",move," coup     ")
-                        self.f.labelGagner(move)
-                        gagner = True
+                        #global move
+                        #print("     vous avez gagner en ",move," coup     ")
+                        #self.f.labelGagner(move)
+                        #gagner = True
                         return True
         return False
 
@@ -1266,6 +1346,8 @@ class matrice:
 
 
     def traceChemin(self,chemin,biai=0):
+        self.f.traceFleche(chemin)
+        
         couleur=self.genererCouleur(46,147,249,biai)
         
         for i in range(len(chemin)):
@@ -1288,13 +1370,14 @@ class matrice:
                     fin = max(chemin[i][1], chemin[i+1][1])
                     for y in range(depart, fin):
                         self.f.canvas.itemconfigure(self.tab[chemin[i][0]][y].getId(),fill=couleur)
-
+        
                   
     
 
 
     ##fonctionne avec 1 robot seulement
     def resFile(self):
+        
         for bot in range(len(self.tabR)):
                 
             dejaVue = [[-1 for x in range(self.l)] for y in range(self.L)]
@@ -1361,7 +1444,7 @@ class matrice:
                     position = dejaVue[position[0]][position[1]]                                   
                                           
 
-                    self.traceChemin(chemin,biai=bot)
+                self.traceChemin(chemin,biai=bot)
             else:
                 print("pour le robot numero ", bot, ", grille non resolvable")
 
@@ -1477,7 +1560,7 @@ def sauvegarder():
     try:
     
         global tableau
-        print(tableau)
+        
         if tableau != None:
 
             
@@ -1578,7 +1661,7 @@ def edition():
     f.frameEdition.grid_propagate(0)
 
     if tableau == None:
-        tableau=matrice(edition=True)
+        tableau=matrice(mode="edition")
     else:
         tableau.editeur()
     
@@ -1608,7 +1691,13 @@ def menuResolution():
    #     print("une erreur est survenu, impossible de resoudre")
         
     
-
+def menuRicochet():
+    try:
+        global tableau
+    except NameError:
+        print("creation du tableau")
+    tableau = matrice(mode = "ricochet")  
+        
 
 
 
@@ -1668,7 +1757,7 @@ if len(sys.argv) == 2:
         
 
 #par défault
-else:      
+else:
     tableau=matrice(20,20,40,infoRicochet, solvable = True,mouvement = 30)
     #reset()
 
@@ -1682,6 +1771,8 @@ menubar = Menu(f.fenetre)
 
 menu1 = Menu(menubar, tearoff=0)
 menu1.add_command(label="Commencer", command=reset)
+menu1.add_command(label="jouer Version Robot Ricochet", command=menuRicochet)
+menu1.add_separator()
 #if tableau !=None:
  #   menu1.add_command(label="pause", command=tableau.pause)
 menu1.add_command(label="Sauvegarder", command=sauvegarder)

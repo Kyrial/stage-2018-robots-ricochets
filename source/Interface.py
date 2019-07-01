@@ -69,7 +69,13 @@ class interface:
         return identifiant
 
 
-
+    def traceFleche(self,liste):
+       
+        liste = list(map(lambda x:( x[0]*self.tailleCase+(self.tailleCase/2)
+                                    ,x[1]*self.tailleCase+(self.tailleCase/2)), liste))
+        
+        self.canvas.create_line(liste,arrow = "first",width = 3)
+        
 
 
 
