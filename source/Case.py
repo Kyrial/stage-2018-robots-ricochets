@@ -47,6 +47,9 @@ class case:
     def getId(self):
         return self.Id
 
+    def getBasouDroite(self):
+        return (self.bas or self.droite)
+
     ##setter
     def setHaut(self, x):
         self.haut= x

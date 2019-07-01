@@ -187,8 +187,8 @@ class matrice:
 
     def ricochetCarreCentrale(self,x,y):
         
-        self.tab[7+(2*x)][7+(y)].setGauche(True)
-        self.tab[7+(x)][7+(2*y)].setHaut(True)
+        self.tab[8-(2*x)][8-(y)].setDroite(True)
+        self.tab[8-(x)][8-(2*y)].setBas(True)
         
         
 
@@ -200,27 +200,31 @@ class matrice:
 
     def murAngle(self,x,y):
         positionLibre=[[0 for x in range(8)] for y in range(8)]
-        
+        tabArete=[[0 for x in range(8)] for y in range(8)]
         for i in range(0,2):
             for j in range(0,2):
                 while True:
                     newX=randint(1,6)+(x*7)
                     newY=randint(1,6)+(y*7)
-                    if positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0:
+                    ##on enleve les cas où il y aurais contacte avec un autre mur
+                    if (positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0 and
+                        tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]+
+                        tabArete[newX-(x*7)][newY-(y*7)]+
+                        tabArete[newX-(x*7)+1][newY-(y*7)-1+(2*j)]==0 ):
                         break
                 
                 self.tab[newX+i][newY].setBas(True)
                 self.tab[newX][newY+j].setDroite(True)
 
-                positionLibre[newX-(x*7)+((i-1)*(-1))][newY-(y*7)+((j-1)*(-1))]=1
+                tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]=1
+                tabArete[newX-(x*7)][newY-(y*7)]=1
+                tabArete[newX-(x*7)+1][newY-(y*7)-1+(2*j)]=1
+                
+                #positionLibre[newX-(x*7)+((i-1)*(-1))][newY-(y*7)+((j-1)*(-1))]=1
                 for k in range(8):
                     positionLibre[newX-(x*7)+i][k]=1
                     positionLibre[k][newY-(y*7)+j]=1
 
-        for q in range(8):
-            print( positionLibre[q])
-        print("\n")
-        
 
 
 ####FIN RICOCHET PLATEAU ###
@@ -1758,7 +1762,8 @@ if len(sys.argv) == 2:
 
 #par défault
 else:
-    tableau=matrice(20,20,40,infoRicochet, solvable = True,mouvement = 30)
+    #tableau=matrice(20,20,40,infoRicochet, solvable = True,mouvement = 30)
+    tableau=matrice(20,20,40,infoRicochet)
     #reset()
 
 
