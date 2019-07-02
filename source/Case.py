@@ -15,6 +15,7 @@ class case:
         self.robot = robot
         self.sortie = sortie
         self.Id = 0
+        self.exterieur = False
 
 
         #gère un ou plusieur mur suivant l'aléatoire
@@ -47,8 +48,12 @@ class case:
     def getId(self):
         return self.Id
 
-    def getBasouDroite(self):
-        return (self.bas or self.droite)
+    def sumMur(self):
+        return( (1 if self.bas else 0)+(1 if self.haut else 0)+
+                (1 if self.droite else 0)+(1 if self.gauche else 0))
+
+    def getExterieur(self):
+        return self.exterieur
 
     ##setter
     def setHaut(self, x):
@@ -65,6 +70,8 @@ class case:
         self.sortie = x
     def setId(self, a):
         self.Id = a
+    def setExterieur(self,a):
+        self.exterieur= a
 
     ##genere mur aléatoire
     def ajoutAleatMur(self):

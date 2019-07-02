@@ -25,6 +25,8 @@ class interface:
                     self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
                                                  (li+1)*self.tailleCase,(co+1)*self.tailleCase,
                                         fill='#2c2c2c',outline='#2c2c2c', tags= 'exterieur')
+                    if (li,co) in LiCaseExclure:
+                        case[li][co].setExterieur(True)
                 else:                    
                     Id= self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
                                                  (li+1)*self.tailleCase,(co+1)*self.tailleCase,

@@ -1,6 +1,5 @@
 from tkinter import *
 import random
-
 import sys, os, platform, time
 
 ##messagebox:
@@ -175,9 +174,15 @@ class matrice:
         self.ricochetQuartier(0,1)
         self.ricochetQuartier(1,1)
 
-
-        
         self.placeMur()
+        self.initBot()
+        self.placeSortieRicochet()
+        
+        self.placeRobots()
+        self.placeSorties()
+
+        self.resRicochet()
+
 
     def ricochetQuartier(self,x,y):
         tabArete=[[0 for x in range(8)] for y in range(8)]
@@ -210,8 +215,6 @@ class matrice:
     
 
     def murAngle(self,x,y,tabArete):
-
-     
         positionLibre=[[0 for x in range(8)] for y in range(8)]
         #tabArete=[[0 for x in range(7)] for y in range(7)]
         for i in range(0,2):
@@ -238,11 +241,33 @@ class matrice:
                     positionLibre[newX-(x*7)+i][k]=1
                     positionLibre[k][newY-(y*7)+j]=1
 
+
+
+
                 
+    def placeSortieRicochet(self):
+        aleaX=randint(0,15)
+        aleaY=randint(0,15)        
+        while (self.tab[aleaX][aleaY].getRobot()==True
+               or self.tab[aleaX][aleaY].sumMur() < 2
+               or self.tab[aleaX][aleaY].getExterieur()):
+            aleaX=randint(0,15)
+            aleaY=randint(0,15)
+
+        ##place sortie avec couleur d'un robot
+        couleur = random.sample(self.tabCouleur, 1)
+        couleur=couleur[0]
+        self.tabS.append(sortie(aleaX, aleaY ,couleur))
+        self.tab[aleaX][aleaY].setSortie(True)
 
 
 
-####FIN RICOCHET PLATEAU ###
+
+            
+            
+
+
+####FIN CONSTRUCTION RICOCHET PLATEAU ###
 
 
 
@@ -437,13 +462,6 @@ class matrice:
         self.couleurPipette = "red"
         self.tabCouleur.append("red")
     
-##
-##        if "Linux" in platform.uname()[0]:
-##            ##pour comptabilité linux (mollette souris):
-##            self.f.canvas.bind("<Button-4>", self.rouletteUp)
-##            self.f.canvas.bind("<Button-5>", self.changeCase)
-##        else:
-##            self.f.canvas.bind("<MouseWheel>", self.roulette)
 
         self.f.canvas.bind("<Button-1>", self.changeCase)
         self.f.canvas.bind("<Button-3>", self.cliqueDroit)
@@ -453,7 +471,8 @@ class matrice:
 
 
 
-###pour initialiser matrice via fichier
+####DEBUT GENERATION GRILLE PAR FICHIER####
+
 
     #on cree la matri par rapport au fichier fournis
     def creerViaFichier(self):
@@ -511,7 +530,13 @@ class matrice:
 
 
         self.creerInterface()
-                
+
+
+####FIN GENERATION GRILLE PAR FICHIER####
+
+
+
+####DEBUT GENERATION LISTE DE COUP####
 
 
 
@@ -593,7 +618,7 @@ class matrice:
 
 
 
-    #cree la matrice par rapport au paramètre.
+####DEBUT GENERATION DE LA GRLLE ALEATOIREMENT####
     
         
     def creerTab(self):
@@ -652,7 +677,8 @@ class matrice:
             #pour le nombre de couleur differente a utiliser
 
 
-            if(self.tab[x][y].getRobot()==False):
+            if(self.tab[x][y].getRobot()==False
+               and self.tab[x][y].getExterieur()==False):
                 if couleurDiffRestante > 0:
                     
                     couleur =self.genererCouleur()
@@ -735,8 +761,12 @@ class matrice:
 
                 a=a+1
 
+####FIN GENERATION DE LA GRLLE ALEATOIREMENT####
 
 
+####DEBUT GENERATION GRILLE SOLVABLE###
+
+                
     def initSolvable(self):
         #pour les grille solvable, on suppose qu'il y a autant de robot que de sortie
         #et les occurance de couleur sont identique pour les robot et les sortie.
@@ -965,9 +995,6 @@ class matrice:
 
             #on place le robot au premier plan pour éviter d'etre "cache" par la sortie
             self.f.canvas.tag_raise(self.tabR[i].getId())            
-  
-
-
 
 
         del self.tabPositionInitiale
@@ -977,9 +1004,12 @@ class matrice:
         self.f.afficheMove(move)
                 
                 
+####FIN GENERATION SOLVABLE####
 
 
 
+
+####DEBUT INITALISATION INTERFACE####
 
     def placeMur(self):
         #on place les murs
@@ -1025,14 +1055,14 @@ class matrice:
          #   break
                 
                 
-####fin initialisation partie            
+####DEBUT INITALISATION INTERFACE####          
 
 
 
 
 
             
-####debut partie:
+####DEBUT FONCTION D'EVENEMENT ET DE MOUVEMENT DE LA PARTIE###
 
  
     ##gère l'evenement "clique souris"
@@ -1289,7 +1319,13 @@ class matrice:
                     
                     return compteur
                 else:
-                    return 0
+                   return 0
+
+####FIN FONCTION D'EVENEMENT DE LA PARTIE###
+
+
+####DEBUT FONCTION DE VERIFICATION####
+
 
     def verifSortie(self,i,x,y):
         #global gagner
@@ -1306,6 +1342,16 @@ class matrice:
                         #print("     vous avez gagner en ",move," coup     ")
                         #self.f.labelGagner(move)
                         #gagner = True
+                        return True
+        return False
+    
+    def verifSortieParametre(self,i,tabRobot,grille):
+        x = tabRobot[i].getX()
+        y = tabRobot[i].getY()
+        if grille[x][y].getSortie():
+            for j in range(self.getSortie()):
+                if self.tabS[j].getX()==x and self.tabS[j].getY() == y:
+                    if tabRobot[i].getCouleur() == self.tabS[j].getCouleur():
                         return True
         return False
 
@@ -1332,8 +1378,8 @@ class matrice:
         else:
             return False
            
-            
-                        
+
+####FIN FONCTION DE VERIFICATION####                     
                         
 
     def genererCouleur(self, r = None,v = None,b = None,biai=1):
@@ -1362,6 +1408,12 @@ class matrice:
 ##        else:
 ##            self.f.canvas.bind("<Button-1>", self.clique)
 ##            pause = False
+
+
+
+
+
+#### DEBUT FONCTION DE RESOLUTION DE MATRICE####
 
 
     def traceChemin(self,chemin,biai=0):
@@ -1394,7 +1446,7 @@ class matrice:
     
 
 
-    ##fonctionne avec 1 robot seulement
+    ##Resoud indépendemment chaque robot (aucune interaction sans robot)
     def resFile(self):
         
         for bot in range(len(self.tabR)):
@@ -1419,6 +1471,7 @@ class matrice:
                 if self.verifSortie(bot,file[0][0], file[0][1]):
                     print("pour le robot numero ", bot, ", grille resolvable")
                     resolv=True
+
                 
                 else:
                     haut = self.movePossibleH(file[0][0],file[0][1])
@@ -1468,9 +1521,110 @@ class matrice:
                 print("pour le robot numero ", bot, ", grille non resolvable")
 
         
-                              
+    ##version pour Ricochet
+    def resRicochet(self):
+        print("miaou")
+        grille=list(self.tab)
+        tabRobot = list(self.tabR)
+        debut = time.time()
+        a=self.resPile(grille,tabRobot,'0', 0, 100)
+        fin = time.time()
+        print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
 
+        print(a)
+
+    def resPile(self,grille,tabRobot,mouvement,profondeur,borne):
+        #print(profondeur, borne, "\n")
+
+        solution= False
+
+        if self.verifSortieParametre(int(mouvement[0]),tabRobot,grille):
+            print("pour le robot numero ", mouvement[0], ", grille resolvable, profondeur :", profondeur)
+               
+            return (True, profondeur-1)
+            
+            
+        elif profondeur < borne:
+            for i in range (self.bot):
+
+                x =  tabRobot[i].getX()
+                y =  tabRobot[i].getY()
+                
+                haut = self.movePossibleH(x,y)
+                if haut > 0 and str(i)+'bas'!= mouvement:
+                    #print(i, "haut",x,y)
+
+                   
+                    grille[x][y].setRobot( False)
+                    y=y-haut ##actualise y
+                    grille[x][y].setRobot( True )
+                    tabRobot[i].setY(y)
+                    
+                    paire=self.resPile(grille,tabRobot,str(i)+'haut',profondeur+1,borne)
+                    solution = paire[0] or solution
+                    borne = min(paire[1], borne)
+                    
+                bas = self.movePossibleB(x,y)
+                if bas > 0 and str(i)+'haut'!= mouvement:
+                    #print(i, "bas",x,y)
+
+                   
+                    grille[x][y].setRobot( False)
+                    y=y+bas ##actualise y
+                    grille[x][y].setRobot( True )
+                    tabRobot[i].setY(y)
+                    
+                    paire=self.resPile(grille,tabRobot,str(i)+'bas',profondeur+1,borne)
+                    solution = paire[0] or solution
+                    borne = min(paire[1], borne)
+                gauche = self.movePossibleG(x,y)
+                if gauche > 0 and str(i)+'droite'!= mouvement:
+                    #print(i, "gauche",x,y)
+
+                   
+                    grille[x][y].setRobot( False)
+                    x=x-gauche ##actualise x
+                    grille[x][y].setRobot( True )
+                    tabRobot[i].setX(x)
+                    
+                    paire = self.resPile(grille,tabRobot,str(i)+'gauche',profondeur+1,borne)
+                    solution = paire[0] or solution
+                    borne = min(paire[1], borne)
+
+                droite = self.movePossibleD(x,y)
+                if droite > 0 and str(i)+'gauche'!= mouvement:
+                    #print(i, "droite",x,y)
+
+                   
+                    grille[x][y].setRobot( False)
+                    x=x+droite ##actualise x
+                    grille[x][y].setRobot( True )
+                    tabRobot[i].setX(x)
+                    
+                    paire=self.resPile(grille,tabRobot,str(i)+'droite',profondeur+1,borne)
+                    solution = paire[0] or solution
+                    borne = min(paire[1], borne)                    
+
+                          
+
+                    
+
+        return (solution, borne)
+    
         
+        
+
+
+
+
+
+          
+            
+
+
+
+
+#### FIN FONCTION DE RESOLUTION DE MATRICE####      
         
 
 #####FIN MATRICE ######
