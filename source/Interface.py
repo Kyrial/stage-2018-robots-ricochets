@@ -10,7 +10,7 @@ class interface:
         self.fenetre = fen
 
 
-    def creerCanvas(self, L, l, case):
+    def creerCanvas(self, L, l, case,LiCaseExclure = []):
         self.canvas = Canvas(self.fenetre,  width=600, height=600,
                              borderwidth=5,background="white")
         self.canvas['scrollregion'] = (-25,-25,575,575)
@@ -21,7 +21,7 @@ class interface:
             for co in range(0,l):
                 #print( "li :",li , "co : ", co)
                 
-                if case[li][co] == 0:
+                if case[li][co] == 0 or (li,co) in LiCaseExclure:
                     self.canvas.create_rectangle(li*self.tailleCase,co*self.tailleCase,
                                                  (li+1)*self.tailleCase,(co+1)*self.tailleCase,
                                         fill='#2c2c2c',outline='#2c2c2c', tags= 'exterieur')

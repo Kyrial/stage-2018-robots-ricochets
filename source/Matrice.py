@@ -168,7 +168,7 @@ class matrice:
         self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
             
         self.ajoutBordure()       
-        self.f.creerCanvas(self.L,self.l, self.tab)
+        self.f.creerCanvas(self.L,self.l, self.tab,[(7,7),(7,8),(8,7),(8,8)])
 
         self.ricochetQuartier(0,0)
         self.ricochetQuartier(1,0)
@@ -180,37 +180,50 @@ class matrice:
         self.placeMur()
 
     def ricochetQuartier(self,x,y):
-        self.ricochetCarreCentrale(x,y)
-        self.murRicochet(x,y)
-        self.murAngle(x,y)        
+        tabArete=[[0 for x in range(8)] for y in range(8)]
+        
+        self.ricochetCarreCentrale(x,y,tabArete)
+        self.murRicochet(x,y,tabArete)      
+        self.murAngle(x,y,tabArete)        
       
 
-    def ricochetCarreCentrale(self,x,y):
+    def ricochetCarreCentrale(self,x,y,tabArete):
+
+        tabArete[(x-1)*(-5)+1][(y-1)*(-5)+1]=1
         
         self.tab[8-(2*x)][8-(y)].setDroite(True)
         self.tab[8-(x)][8-(2*y)].setBas(True)
         
         
 
-    def murRicochet(self,x,y):
+    def murRicochet(self,x,y,tabArete):
 
-        self.tab[randint(1,6)+(x*7)][0+(y*15)].setDroite(True)
-        self.tab[0+(x*15)][randint(1,6)+(y*7)].setBas(True)
+        aleaX=randint(1,6)
+        aleaY=randint(1,6)
+
+        self.tab[aleaX+(x*7)][0+(y*15)].setDroite(True)
+        self.tab[0+(x*15)][aleaY+(y*7)].setBas(True)
+
+        tabArete[aleaX][(y*7)]=1
+        tabArete[(x*7)][aleaY]=1
+    
     
 
-    def murAngle(self,x,y):
+    def murAngle(self,x,y,tabArete):
+
+     
         positionLibre=[[0 for x in range(8)] for y in range(8)]
-        tabArete=[[0 for x in range(8)] for y in range(8)]
+        #tabArete=[[0 for x in range(7)] for y in range(7)]
         for i in range(0,2):
             for j in range(0,2):
                 while True:
                     newX=randint(1,6)+(x*7)
                     newY=randint(1,6)+(y*7)
-                    ##on enleve les cas où il y aurais contacte avec un autre mur
+                    ##on enleve les cas où il y aurait contacte avec un autre mur
                     if (positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0 and
-                        tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]+
+                        (tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]+
                         tabArete[newX-(x*7)][newY-(y*7)]+
-                        tabArete[newX-(x*7)+1][newY-(y*7)-1+(2*j)]==0 ):
+                        tabArete[newX-(x*7)][newY-(y*7)-1+(2*j)]==0) ):
                         break
                 
                 self.tab[newX+i][newY].setBas(True)
@@ -218,12 +231,14 @@ class matrice:
 
                 tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]=1
                 tabArete[newX-(x*7)][newY-(y*7)]=1
-                tabArete[newX-(x*7)+1][newY-(y*7)-1+(2*j)]=1
+                tabArete[newX-(x*7)][newY-(y*7)-1+(2*j)]=1
                 
                 #positionLibre[newX-(x*7)+((i-1)*(-1))][newY-(y*7)+((j-1)*(-1))]=1
                 for k in range(8):
                     positionLibre[newX-(x*7)+i][k]=1
                     positionLibre[k][newY-(y*7)+j]=1
+
+                
 
 
 
