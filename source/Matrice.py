@@ -9,6 +9,8 @@ from tkinter.simpledialog import askinteger
 ##ppour ouvrir la fenetre de recherche de fichier
 from tkinter.filedialog import *
 
+import copy
+
 #import Plateau
 
 #on importe les autres classes: case, robot, sortie, interface
@@ -174,6 +176,7 @@ class matrice:
         self.ricochetQuartier(0,1)
         self.ricochetQuartier(1,1)
 
+
         self.placeMur()
         self.initBot()
         self.placeSortieRicochet()
@@ -181,7 +184,7 @@ class matrice:
         self.placeRobots()
         self.placeSorties()
 
-        self.resRicochet()
+        #self.resRicochet()
 
 
     def ricochetQuartier(self,x,y):
@@ -212,36 +215,48 @@ class matrice:
         tabArete[aleaX][(y*7)]=1
         tabArete[(x*7)][aleaY]=1
     
+
+
+    def verifPlacementRicochet(self, x, y, i, j, positionLibre, tabArete):
+        while True:
+            newX=randint(1,6)+(x*7)
+            newY=randint(1,6)+(y*7)
+            ##on enleve les cas où il y aurait contacte avec un autre mur
+            if (positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0 and
+                (tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]+
+                tabArete[newX-(x*7)][newY-(y*7)]+
+                tabArete[newX-(x*7)][newY-(y*7)-1+(2*j)]==0) ):
+                break
+        self.tab[newX+i][newY].setBas(True)
+        self.tab[newX][newY+j].setDroite(True)
+
+        tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]=1
+        tabArete[newX-(x*7)][newY-(y*7)]=1
+        tabArete[newX-(x*7)][newY-(y*7)-1+(2*j)]=1
     
+        #positionLibre[newX-(x*7)+((i-1)*(-1))][newY-(y*7)+((j-1)*(-1))]=1
+        for k in range(8):
+            positionLibre[newX-(x*7)+i][k]=1
+            positionLibre[k][newY-(y*7)+j]=1
+        
+                
+        
+                               
 
     def murAngle(self,x,y,tabArete):
         positionLibre=[[0 for x in range(8)] for y in range(8)]
         #tabArete=[[0 for x in range(7)] for y in range(7)]
+
+        
         for i in range(0,2):
             for j in range(0,2):
-                while True:
-                    newX=randint(1,6)+(x*7)
-                    newY=randint(1,6)+(y*7)
-                    ##on enleve les cas où il y aurait contacte avec un autre mur
-                    if (positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0 and
-                        (tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]+
-                        tabArete[newX-(x*7)][newY-(y*7)]+
-                        tabArete[newX-(x*7)][newY-(y*7)-1+(2*j)]==0) ):
-                        break
-                
-                self.tab[newX+i][newY].setBas(True)
-                self.tab[newX][newY+j].setDroite(True)
-
-                tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]=1
-                tabArete[newX-(x*7)][newY-(y*7)]=1
-                tabArete[newX-(x*7)][newY-(y*7)-1+(2*j)]=1
-                
-                #positionLibre[newX-(x*7)+((i-1)*(-1))][newY-(y*7)+((j-1)*(-1))]=1
-                for k in range(8):
-                    positionLibre[newX-(x*7)+i][k]=1
-                    positionLibre[k][newY-(y*7)+j]=1
+                self.verifPlacementRicochet( x, y, i, j, positionLibre, tabArete)
 
 
+        if x == 1 and y == 0:
+                    self.verifPlacementRicochet(0,1,
+                                    randint(0,1),randint(0,1), positionLibre, tabArete)
+        
 
 
                 
@@ -1140,40 +1155,48 @@ class matrice:
 
 
 
-    def movePossibleH(self, x, y):
+    def movePossibleH(self, x, y,grille=None):
+        if grille ==None:
+            grille = self.tab
         compteur=0       
-        while (self.tab[x][y].getHaut() == False and
-                self.tab[x][y-1].getBas() == False and
-                self.tab[x][y-1].getRobot() == False ):
+        while (grille[x][y].getHaut() == False and
+                grille[x][y-1].getBas() == False and
+                grille[x][y-1].getRobot() == False ):
             y=y-1
             compteur=compteur + 1
         return compteur;
 
 
-    def movePossibleB(self, x, y):
+    def movePossibleB(self, x, y,grille=None):
+        if grille ==None:
+            grille = self.tab
         compteur=0                    
-        while (self.tab[x][y].getBas() == False and
-                self.tab[x][y+1].getHaut() == False and
-                self.tab[x][y+1].getRobot() == False ):
+        while (grille[x][y].getBas() == False and
+                grille[x][y+1].getHaut() == False and
+                grille[x][y+1].getRobot() == False ):
             y=y+1
             compteur=compteur + 1
         return compteur
     
-    def movePossibleG(self, x, y):
+    def movePossibleG(self, x, y,grille=None):
+        if grille ==None:
+            grille = self.tab
         compteur=0                    
-        while (self.tab[x][y].getGauche() == False and
-                self.tab[x-1][y].getDroite() == False and
-                self.tab[x-1][y].getRobot() == False ):
+        while (grille[x][y].getGauche() == False and
+                grille[x-1][y].getDroite() == False and
+                grille[x-1][y].getRobot() == False ):
             x=x-1      
             compteur=compteur + 1
         return compteur
 
  
-    def movePossibleD(self, x, y):
+    def movePossibleD(self, x, y,grille=None):
+        if grille ==None:
+            grille = self.tab
         compteur=0
-        while (self.tab[x][y].getDroite() == False and
-                self.tab[x+1][y].getGauche() == False and
-                self.tab[x+1][y].getRobot() == False ):
+        while (grille[x][y].getDroite() == False and
+                grille[x+1][y].getGauche() == False and
+                grille[x+1][y].getRobot() == False ):
             x=x+1
             compteur=compteur + 1
         return compteur
@@ -1524,24 +1547,28 @@ class matrice:
     ##version pour Ricochet
     def resRicochet(self):
         print("miaou")
-        grille=list(self.tab)
-        tabRobot = list(self.tabR)
+        grille=copy.deepcopy(self.tab)
+        tabRobot = copy.deepcopy(self.tabR)
+
         debut = time.time()
-        a=self.resPile(grille,tabRobot,'0', 0, 100)
+        a=self.resPile(grille,tabRobot,'','0', 0, 3)
         fin = time.time()
         print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
-
         print(a)
+        #print(a[0], a[1]+1)
 
-    def resPile(self,grille,tabRobot,mouvement,profondeur,borne):
-        #print(profondeur, borne, "\n")
+    def resPile(self,grille,tabRobot,dico,mouvement,profondeur,borne):
+       # if profondeur !=0:
+         #   print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
 
         solution= False
 
         if self.verifSortieParametre(int(mouvement[0]),tabRobot,grille):
+            print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
+ 
             print("pour le robot numero ", mouvement[0], ", grille resolvable, profondeur :", profondeur)
                
-            return (True, profondeur-1)
+            return (True, profondeur-1,'')
             
             
         elif profondeur < borne:
@@ -1550,58 +1577,69 @@ class matrice:
                 x =  tabRobot[i].getX()
                 y =  tabRobot[i].getY()
                 
-                haut = self.movePossibleH(x,y)
+                haut = self.movePossibleH(x,y,grille)
                 if haut > 0 and str(i)+'bas'!= mouvement:
                     #print(i, "haut",x,y)
 
-                   
-                    grille[x][y].setRobot( False)
-                    y=y-haut ##actualise y
-                    grille[x][y].setRobot( True )
-                    tabRobot[i].setY(y)
+                    copieGrille = copy.deepcopy(grille)
+                    copieTabRobot = copy.deepcopy(tabRobot)
                     
-                    paire=self.resPile(grille,tabRobot,str(i)+'haut',profondeur+1,borne)
+                    copieGrille[x][y].setRobot( False)                
+                    copieGrille[x][y-haut].setRobot( True )
+                    copieTabRobot[i].setY(y-haut)
+                    
+                    paire=self.resPile(copieGrille,copieTabRobot,'',str(i)+'haut',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)
+
+                
                     
-                bas = self.movePossibleB(x,y)
+                bas = self.movePossibleB(x,y,grille)
                 if bas > 0 and str(i)+'haut'!= mouvement:
                     #print(i, "bas",x,y)
 
+                    copieGrille = copy.deepcopy(grille)
+                    copieTabRobot = copy.deepcopy(tabRobot)
                    
-                    grille[x][y].setRobot( False)
-                    y=y+bas ##actualise y
-                    grille[x][y].setRobot( True )
-                    tabRobot[i].setY(y)
+                    copieGrille[x][y].setRobot( False)                    
+                    copieGrille[x][y+bas].setRobot( True )
+                    copieTabRobot[i].setY(y+bas)
                     
-                    paire=self.resPile(grille,tabRobot,str(i)+'bas',profondeur+1,borne)
+                    paire=self.resPile(copieGrille,copieTabRobot,'',str(i)+'bas',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)
-                gauche = self.movePossibleG(x,y)
+
+
+                
+                gauche = self.movePossibleG(x,y,grille)
                 if gauche > 0 and str(i)+'droite'!= mouvement:
                     #print(i, "gauche",x,y)
 
-                   
-                    grille[x][y].setRobot( False)
-                    x=x-gauche ##actualise x
-                    grille[x][y].setRobot( True )
-                    tabRobot[i].setX(x)
+                    copieGrille = copy.deepcopy(grille)
+                    copieTabRobot = copy.deepcopy(tabRobot)
+           
+                    copieGrille[x][y].setRobot( False)                
+                    copieGrille[x-gauche][y].setRobot( True )
+                    copieTabRobot[i].setX(x-gauche)
                     
-                    paire = self.resPile(grille,tabRobot,str(i)+'gauche',profondeur+1,borne)
+                    paire = self.resPile(copieGrille,copieTabRobot,'',str(i)+'gauche',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)
 
-                droite = self.movePossibleD(x,y)
+
+
+                droite = self.movePossibleD(x,y,grille)
                 if droite > 0 and str(i)+'gauche'!= mouvement:
                     #print(i, "droite",x,y)
 
-                   
-                    grille[x][y].setRobot( False)
-                    x=x+droite ##actualise x
-                    grille[x][y].setRobot( True )
-                    tabRobot[i].setX(x)
+                    copieGrille = copy.deepcopy(grille)
+                    copieTabRobot = copy.deepcopy(tabRobot)
                     
-                    paire=self.resPile(grille,tabRobot,str(i)+'droite',profondeur+1,borne)
+                    copieGrille[x][y].setRobot( False)               
+                    copieGrille[x+droite][y].setRobot( True )
+                    copieTabRobot[i].setX(x+droite)
+                    
+                    paire=self.resPile(copieGrille,copieTabRobot,'',str(i)+'droite',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)                    
 
@@ -1609,7 +1647,7 @@ class matrice:
 
                     
 
-        return (solution, borne)
+        return (solution, borne,'')
     
         
         
@@ -1862,6 +1900,10 @@ def menuResolution():
 
    # except:
    #     print("une erreur est survenu, impossible de resoudre")
+
+def menuResRicochet():
+    global tableau
+    tableau.resRicochet()
         
     
 def menuRicochet():
@@ -1958,9 +2000,12 @@ menubar.add_cascade(label="Fichier", menu=menu1)
 
 menu2 = Menu(menubar, tearoff=0)
 menu2.add_command(label="resolution Grille", command=menuResolution)
-menubar.add_cascade(label="resolution", menu=menu2)
-f.fenetre.config(menu=menubar)
+menu2.add_separator()
 
+menu2.add_command(label="resolution ricochet", command=menuResRicochet)
+menubar.add_cascade(label="resolution", menu=menu2)
+
+f.fenetre.config(menu=menubar)
 
 
 
