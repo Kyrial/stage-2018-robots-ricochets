@@ -184,11 +184,13 @@ class matrice:
         self.placeRobots()
         self.placeSorties()
 
+        self.executePartie()
+
         #self.resRicochet()
 
 
     def ricochetQuartier(self,x,y):
-        tabArete=[[0 for x in range(8)] for y in range(8)]
+        tabArete=[[0 for k in range(8)] for l in range(8)]
         
         self.ricochetCarreCentrale(x,y,tabArete)
         self.murRicochet(x,y,tabArete)      
@@ -217,10 +219,16 @@ class matrice:
     
 
 
-    def verifPlacementRicochet(self, x, y, i, j, positionLibre, tabArete):
+    def verifPlacementRicochet(self, x, y, i, j, positionLibre, tabArete, nonAleatoire=None):
         while True:
-            newX=randint(1,6)+(x*7)
-            newY=randint(1,6)+(y*7)
+            if nonAleatoire ==True:
+                newX=randint(1,6)+(x*7)
+                newY=7+(y*7)   
+            else:
+                newX=randint(1,6)+(x*7)
+                newY=randint(1,6)+(y*7)
+
+
             ##on enleve les cas où il y aurait contacte avec un autre mur
             if (positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0 and
                 (tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]+
@@ -244,18 +252,19 @@ class matrice:
                                
 
     def murAngle(self,x,y,tabArete):
-        positionLibre=[[0 for x in range(8)] for y in range(8)]
+        positionLibre=[[0 for k in range(8)] for l in range(8)]
         #tabArete=[[0 for x in range(7)] for y in range(7)]
 
-        
+        if x == 1 and y == 0:
+                    self.verifPlacementRicochet(x,y,
+                                    randint(0,1),0,positionLibre,
+                                                tabArete,nonAleatoire=True)   
         for i in range(0,2):
             for j in range(0,2):
                 self.verifPlacementRicochet( x, y, i, j, positionLibre, tabArete)
 
 
-        if x == 1 and y == 0:
-                    self.verifPlacementRicochet(0,1,
-                                    randint(0,1),randint(0,1), positionLibre, tabArete)
+
         
 
 
@@ -1440,6 +1449,7 @@ class matrice:
 
 
     def traceChemin(self,chemin,biai=0):
+        
         self.f.traceFleche(chemin)
         
         couleur=self.genererCouleur(46,147,249,biai)
@@ -1529,6 +1539,7 @@ class matrice:
 
             
             chemin = []
+            
             if resolv:
                 
                 chemin.append((file[0][0], file[0][1]))
@@ -1537,9 +1548,9 @@ class matrice:
                     
                     chemin.append(dejaVue[position[0]][position[1]])
                     position = dejaVue[position[0]][position[1]]                                   
-                                          
-
-                self.traceChemin(chemin,biai=bot)
+                                     
+                if len(chemin)>=2:
+                    self.traceChemin(chemin,biai=bot)
             else:
                 print("pour le robot numero ", bot, ", grille non resolvable")
 
@@ -1551,13 +1562,25 @@ class matrice:
         tabRobot = copy.deepcopy(self.tabR)
 
         debut = time.time()
-        a=self.resPile(grille,tabRobot,'','0', 0, 3)
-        fin = time.time()
-        print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
-        print(a)
-        #print(a[0], a[1]+1)
+        dicoListeMove ={}
+        for i in range(self.bot):
+            dicoListeMove[i]= []
+            dicoListeMove[i].append((tabRobot[i].getX(),tabRobot[i].getY()))
 
-    def resPile(self,grille,tabRobot,dico,mouvement,profondeur,borne):
+        print(dicoListeMove)
+        res=self.resPile(grille,tabRobot,dicoListeMove,'0', 0, 5)
+        fin = time.time()
+    
+        print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
+        print(res)
+
+        for i in range(self.bot):
+            print(res[2][i], len(res[2][i]))
+            if len(res[2][i])>=2:
+                res[2][i].reverse()
+                self.traceChemin(res[2][i],biai=i)
+
+    def resPile(self,grille,tabRobot,dicoListeMove,mouvement,profondeur,borne):
        # if profondeur !=0:
          #   print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
 
@@ -1568,7 +1591,7 @@ class matrice:
  
             print("pour le robot numero ", mouvement[0], ", grille resolvable, profondeur :", profondeur)
                
-            return (True, profondeur-1,'')
+            return (True, profondeur-1,dicoListeMove)
             
             
         elif profondeur < borne:
@@ -1587,10 +1610,16 @@ class matrice:
                     copieGrille[x][y].setRobot( False)                
                     copieGrille[x][y-haut].setRobot( True )
                     copieTabRobot[i].setY(y-haut)
+
+                    copieDico= copy.deepcopy(dicoListeMove)
+                    copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
                     
-                    paire=self.resPile(copieGrille,copieTabRobot,'',str(i)+'haut',profondeur+1,borne)
+                    paire=self.resPile(copieGrille,copieTabRobot,copieDico,
+                                       str(i)+'haut',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)
+                    if paire[0]:
+                        dicoListeMove = paire[2]
 
                 
                     
@@ -1600,15 +1629,21 @@ class matrice:
 
                     copieGrille = copy.deepcopy(grille)
                     copieTabRobot = copy.deepcopy(tabRobot)
+            
                    
                     copieGrille[x][y].setRobot( False)                    
                     copieGrille[x][y+bas].setRobot( True )
                     copieTabRobot[i].setY(y+bas)
+
+                    copieDico= copy.deepcopy(dicoListeMove)
+                    copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
                     
-                    paire=self.resPile(copieGrille,copieTabRobot,'',str(i)+'bas',profondeur+1,borne)
+                    paire=self.resPile(copieGrille,copieTabRobot,copieDico,
+                                       str(i)+'bas',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)
-
+                    if paire[0]:
+                        dicoListeMove = paire[2]
 
                 
                 gauche = self.movePossibleG(x,y,grille)
@@ -1621,11 +1656,16 @@ class matrice:
                     copieGrille[x][y].setRobot( False)                
                     copieGrille[x-gauche][y].setRobot( True )
                     copieTabRobot[i].setX(x-gauche)
+
+                    copieDico= copy.deepcopy(dicoListeMove)
+                    copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
                     
-                    paire = self.resPile(copieGrille,copieTabRobot,'',str(i)+'gauche',profondeur+1,borne)
+                    paire = self.resPile(copieGrille,copieTabRobot,copieDico,
+                                         str(i)+'gauche',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)
-
+                    if paire[0]:
+                        dicoListeMove = paire[2]
 
 
                 droite = self.movePossibleD(x,y,grille)
@@ -1638,16 +1678,21 @@ class matrice:
                     copieGrille[x][y].setRobot( False)               
                     copieGrille[x+droite][y].setRobot( True )
                     copieTabRobot[i].setX(x+droite)
+
+                    copieDico= copy.deepcopy(dicoListeMove)
+                    copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
                     
-                    paire=self.resPile(copieGrille,copieTabRobot,'',str(i)+'droite',profondeur+1,borne)
+                    paire = self.resPile(copieGrille,copieTabRobot,copieDico,
+                                       str(i)+'droite',profondeur+1,borne)
                     solution = paire[0] or solution
                     borne = min(paire[1], borne)                    
-
+                    if paire[0]:
+                        dicoListeMove = paire[2]
                           
 
                     
 
-        return (solution, borne,'')
+        return (solution, borne, dicoListeMove)
     
         
         
