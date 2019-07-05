@@ -81,21 +81,11 @@ class case:
         elif alea ==2:
             self.droite = True
 
+
+    
+
 ###FIN CASE###
 
-
-
-
-###CLASSE VOISIN(pour le graphe)###
-##
-##class voisin(case):
-##    def __init__(self,tabV, robot = False, sortie = False):
-##        self.tabV=tabV
-##        self.nbV=len(tabV)
-##        robot=False
-##        sortie=False
-##        
-        
 
 
         

@@ -9,6 +9,7 @@ from tkinter.simpledialog import askinteger
 ##ppour ouvrir la fenetre de recherche de fichier
 from tkinter.filedialog import *
 
+##permet de faire des copie en profondeur
 import copy
 
 #import Plateau
@@ -1554,21 +1555,83 @@ class matrice:
             else:
                 print("pour le robot numero ", bot, ", grille non resolvable")
 
+
+
+
+    
+
+    def creerTuplet(self,tabRobot):
+        tuplet = ()        
+        for i in range(1,len(tabRobot)):
+            tuplet = tuplet + (tabRobot[i].coordToNum(self.L),)
+        return tuplet
+
+        
+    def actualiseDico(self, tabRobot, dico):
+        #on actualise le dictionnaire
+        tuplet = self.creerTuplet(tabRobot)
+
+        clef = tabRobot[0].coordToNum(self.L)
+        if clef in dico:     
+            dico[clef].append(tuplet)
+        else:
+            dico[clef] = []
+            dico[clef].append(tuplet)
+        return dico
+
+    def dejaPresentDico(self, tabRobot,dico):
+        clef = tabRobot[0].coordToNum(self.L)
+
+        tuplet = self.creerTuplet(tabRobot)
+        
+        if clef in dico:
+            for verif in dico[clef]:
+                #print(verif, "  ",tuplet ,"\n",set(verif).difference(set(tuplet)))
+                if len(set(verif).difference(set(tuplet)))==0:
+                    return True
+        return False
+        
+    def plusCourtDico(self, listDico):
+        longueur= []
+
+        print(listDico)
+        print(listDico[0])
+
+        for k in range(len(listDico)):
+            longueur.append(0)
+            for i in range(len(listDico[k])):
+                longueur[k]=longueur[k]+len(listDico[k][i])
+
+        return listDico[longueur.index(min(longueur))]
+                            
+    
         
     ##version pour Ricochet
     def resRicochet(self):
-        print("miaou")
+        ##on copie en profondeur les bases de données
         grille=copy.deepcopy(self.tab)
         tabRobot = copy.deepcopy(self.tabR)
 
+        ##on place le robot qui doit atteindre la sortie en 1iere position du tableau
+        for i in range(len(tabRobot)):
+            if self.tabS[0].getCouleur()== tabRobot[i].getCouleur():
+                tmp = tabRobot[i];
+                tabRobot[i] = tabRobot[0];
+                tabRobot[0] = tmp;
+        ##ptetre un souci ici
+
         debut = time.time()
+
+        ##pour tracer le chemin après avoir ttrouver la solution
         dicoListeMove ={}
         for i in range(self.bot):
             dicoListeMove[i]= []
             dicoListeMove[i].append((tabRobot[i].getX(),tabRobot[i].getY()))
 
+        dicoConfig = {}
+
         print(dicoListeMove)
-        res=self.resPile(grille,tabRobot,dicoListeMove,'0', 0, 5)
+        res=self.resPile(grille,tabRobot,dicoListeMove,dicoConfig,'0', 0, 3)
         fin = time.time()
     
         print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
@@ -1580,11 +1643,17 @@ class matrice:
                 res[2][i].reverse()
                 self.traceChemin(res[2][i],biai=i)
 
-    def resPile(self,grille,tabRobot,dicoListeMove,mouvement,profondeur,borne):
+    def resPile(self,grille,tabRobot,dicoListeMove,dicoConfig,mouvement,profondeur,borne):
        # if profondeur !=0:
          #   print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
 
+        dicoConfig = self.actualiseDico(tabRobot, dicoConfig)
+
+        #print( dicoConfig)
+
         solution= False
+        listDicoTmp=[]
+
 
         if self.verifSortieParametre(int(mouvement[0]),tabRobot,grille):
             print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
@@ -1613,13 +1682,18 @@ class matrice:
 
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
+
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+                        
                     
-                    paire=self.resPile(copieGrille,copieTabRobot,copieDico,
+                        paire=self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
                                        str(i)+'haut',profondeur+1,borne)
-                    solution = paire[0] or solution
-                    borne = min(paire[1], borne)
-                    if paire[0]:
-                        dicoListeMove = paire[2]
+                        solution = paire[0] or solution
+                        borne = min(paire[1], borne)
+                        if paire[0]:
+        
+                            listDicoTmp.append(paire[2])
+   
 
                 
                     
@@ -1637,15 +1711,15 @@ class matrice:
 
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+                        paire=self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
+                                           str(i)+'bas',profondeur+1,borne)
+                        solution = paire[0] or solution
+                        borne = min(paire[1], borne)
+                        if paire[0]:
+                            listDicoTmp.append(paire[2])
+     
                     
-                    paire=self.resPile(copieGrille,copieTabRobot,copieDico,
-                                       str(i)+'bas',profondeur+1,borne)
-                    solution = paire[0] or solution
-                    borne = min(paire[1], borne)
-                    if paire[0]:
-                        dicoListeMove = paire[2]
-
-                
                 gauche = self.movePossibleG(x,y,grille)
                 if gauche > 0 and str(i)+'droite'!= mouvement:
                     #print(i, "gauche",x,y)
@@ -1659,14 +1733,15 @@ class matrice:
 
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
-                    
-                    paire = self.resPile(copieGrille,copieTabRobot,copieDico,
-                                         str(i)+'gauche',profondeur+1,borne)
-                    solution = paire[0] or solution
-                    borne = min(paire[1], borne)
-                    if paire[0]:
-                        dicoListeMove = paire[2]
 
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+                        paire = self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
+                                             str(i)+'gauche',profondeur+1,borne)
+                        solution = paire[0] or solution
+                        borne = min(paire[1], borne)
+                        if paire[0]:
+                            listDicoTmp.append(paire[2])
+       
 
                 droite = self.movePossibleD(x,y,grille)
                 if droite > 0 and str(i)+'gauche'!= mouvement:
@@ -1681,14 +1756,21 @@ class matrice:
 
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
-                    
-                    paire = self.resPile(copieGrille,copieTabRobot,copieDico,
-                                       str(i)+'droite',profondeur+1,borne)
-                    solution = paire[0] or solution
-                    borne = min(paire[1], borne)                    
-                    if paire[0]:
-                        dicoListeMove = paire[2]
-                          
+
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+                        paire = self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
+                                           str(i)+'droite',profondeur+1,borne)
+                        solution = paire[0] or solution
+                        borne = min(paire[1], borne)                    
+                        if paire[0]:
+                            listDicoTmp.append(paire[2])
+      
+
+
+        #on stoque dans une liste les dictionnaire des mouvement effectuer ranvoyer par les appel récursif,
+        #on les compare et on renvoie le plus petit dictionnaire (et donc le chemin le plus court pour atteindre l'arriver)                            
+        if len(listDicoTmp) > 0:
+            dicoListeMove = self.plusCourtDico( listDicoTmp) 
 
                     
 

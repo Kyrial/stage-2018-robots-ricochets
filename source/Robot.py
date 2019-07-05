@@ -26,3 +26,11 @@ class robot:
         self.couleur =a
     def setId(self, a):
         self.Id = a
+
+
+
+    def coordToNum(self,largeur):
+        return largeur*self.y+self.x;
+    
+
+    
