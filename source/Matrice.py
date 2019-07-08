@@ -1164,49 +1164,55 @@ class matrice:
 
 
 
-
-    def movePossibleH(self, x, y,grille=None):
+    ##robot est True si on doit ignorer les position des robot lors du calcul des mouvement possible)
+    def movePossibleH(self, x, y,grille=None,Robot=True):
         if grille ==None:
             grille = self.tab
         compteur=0       
         while (grille[x][y].getHaut() == False and
-                grille[x][y-1].getBas() == False and
-                grille[x][y-1].getRobot() == False ):
+                grille[x][y-1].getBas() == False):
+            if Robot and grille[x][y-1].getRobot() == True :
+                break
+
             y=y-1
             compteur=compteur + 1
+  
         return compteur;
 
 
-    def movePossibleB(self, x, y,grille=None):
+    def movePossibleB(self, x, y,grille=None, Robot=True):
         if grille ==None:
             grille = self.tab
         compteur=0                    
         while (grille[x][y].getBas() == False and
-                grille[x][y+1].getHaut() == False and
-                grille[x][y+1].getRobot() == False ):
+                grille[x][y+1].getHaut() == False):
+            if Robot and grille[x][y+1].getRobot() == True :
+                break
             y=y+1
             compteur=compteur + 1
         return compteur
     
-    def movePossibleG(self, x, y,grille=None):
+    def movePossibleG(self, x, y,grille=None, Robot=True):
         if grille ==None:
             grille = self.tab
         compteur=0                    
         while (grille[x][y].getGauche() == False and
-                grille[x-1][y].getDroite() == False and
-                grille[x-1][y].getRobot() == False ):
+                grille[x-1][y].getDroite() == False ):
+            if Robot and grille[x-1][y].getRobot() == True :
+                break
             x=x-1      
             compteur=compteur + 1
         return compteur
 
  
-    def movePossibleD(self, x, y,grille=None):
+    def movePossibleD(self, x, y,grille=None, Robot=True):
         if grille ==None:
             grille = self.tab
         compteur=0
         while (grille[x][y].getDroite() == False and
-                grille[x+1][y].getGauche() == False and
-                grille[x+1][y].getRobot() == False ):
+                grille[x+1][y].getGauche() == False):
+            if Robot and grille[x+1][y].getRobot() == True:
+                break
             x=x+1
             compteur=compteur + 1
         return compteur
@@ -1558,6 +1564,49 @@ class matrice:
 
 
 
+    def creerGrilleDistMin(self,grille):
+        GDM = [[-1 for x in range(self.l)] for y in range(self.L)]
+        file=[]
+        file.append((self.tabS[0].getX(), self.tabS[0].getY()))
+        GDM[file[0][0]][file[0][1]]=0
+        
+        while len(file) > 0:
+            
+            haut = self.movePossibleH(file[0][0],file[0][1],Robot = False)
+            while haut > 0: 
+                if GDM[file[0][0]][file[0][1]-haut]==-1:
+                    file.append( (file[0][0],file[0][1]-haut ) )
+                    GDM[file[0][0]][file[0][1]-haut]=GDM[file[0][0]][file[0][1]]+1
+                haut= haut - 1
+                
+            bas = self.movePossibleB(file[0][0],file[0][1],Robot = False )
+            while bas > 0: 
+                if GDM[file[0][0]][file[0][1]+bas]==-1:
+                    file.append( (file[0][0],file[0][1]+bas ) )
+                    GDM[file[0][0]][file[0][1]+bas]=GDM[file[0][0]][file[0][1]]+1
+                bas= bas - 1
+            gauche = self.movePossibleG(file[0][0],file[0][1],Robot = False)
+            while gauche > 0: 
+                if GDM[file[0][0]-gauche][file[0][1]]==-1:
+                    file.append( (file[0][0]-gauche,file[0][1] ) )
+                    GDM[file[0][0]-gauche][file[0][1]]=GDM[file[0][0]][file[0][1]]+1
+                gauche= gauche - 1
+            droite = self.movePossibleD(file[0][0],file[0][1],Robot = False)
+            while droite > 0: 
+                if GDM[file[0][0]+droite][file[0][1]]==-1:
+                    file.append( (file[0][0]+droite,file[0][1] ) )
+                    GDM[file[0][0]+droite][file[0][1]]=GDM[file[0][0]][file[0][1]]+1
+                droite= droite- 1
+                
+            
+            del file[0]
+##
+##        for k in range(self.L):
+##            for l in range(self.l):
+##                print(GDM[l][k], end=' ')
+##            print('')
+        return GDM
+
     
 
     def creerTuplet(self,tabRobot):
@@ -1567,35 +1616,37 @@ class matrice:
         return tuplet
 
         
-    def actualiseDico(self, tabRobot, dico):
+    def actualiseDico(self, tabRobot, dico,profondeur):
         #on actualise le dictionnaire
         tuplet = self.creerTuplet(tabRobot)
 
         clef = tabRobot[0].coordToNum(self.L)
-        if clef in dico:     
-            dico[clef].append(tuplet)
+        if clef in dico: 
+            dico[clef].append([tuplet,profondeur])
         else:
             dico[clef] = []
-            dico[clef].append(tuplet)
+            dico[clef].append([tuplet,profondeur])
         return dico
 
-    def dejaPresentDico(self, tabRobot,dico):
+    def dejaPresentDico(self, tabRobot,dico,profondeur):
         clef = tabRobot[0].coordToNum(self.L)
 
         tuplet = self.creerTuplet(tabRobot)
-        
+        #print(clef%self.L, int(clef/self.L))
         if clef in dico:
+            
             for verif in dico[clef]:
                 #print(verif, "  ",tuplet ,"\n",set(verif).difference(set(tuplet)))
-                if len(set(verif).difference(set(tuplet)))==0:
-                    return True
+                if len(set(verif[0]).difference(set(tuplet)))==0:
+                    if profondeur >= verif[1]:
+                        return True
         return False
         
     def plusCourtDico(self, listDico):
         longueur= []
 
         print(listDico)
-        print(listDico[0])
+        
 
         for k in range(len(listDico)):
             longueur.append(0)
@@ -1618,20 +1669,23 @@ class matrice:
                 tmp = tabRobot[i];
                 tabRobot[i] = tabRobot[0];
                 tabRobot[0] = tmp;
-        ##ptetre un souci ici
+       
 
-        debut = time.time()
+        
 
         ##pour tracer le chemin après avoir ttrouver la solution
         dicoListeMove ={}
         for i in range(self.bot):
             dicoListeMove[i]= []
             dicoListeMove[i].append((tabRobot[i].getX(),tabRobot[i].getY()))
-
         dicoConfig = {}
 
+
+        self.GDM = self.creerGrilleDistMin(grille)
+
         print(dicoListeMove)
-        res=self.resPile(grille,tabRobot,dicoListeMove,dicoConfig,'0', 0, 3)
+        debut = time.time()
+        res=self.resPile(grille,tabRobot,dicoListeMove,dicoConfig,'0', 0, 5)
         fin = time.time()
     
         print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
@@ -1644,10 +1698,10 @@ class matrice:
                 self.traceChemin(res[2][i],biai=i)
 
     def resPile(self,grille,tabRobot,dicoListeMove,dicoConfig,mouvement,profondeur,borne):
-       # if profondeur !=0:
-         #   print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
+        #if profondeur !=0:
+        #    print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
 
-        dicoConfig = self.actualiseDico(tabRobot, dicoConfig)
+        dicoConfig = self.actualiseDico(tabRobot, dicoConfig,profondeur)
 
         #print( dicoConfig)
 
@@ -1665,9 +1719,14 @@ class matrice:
             
         elif profondeur < borne:
             for i in range (self.bot):
-
                 x =  tabRobot[i].getX()
                 y =  tabRobot[i].getY()
+                
+                ##inutile de tester les mouvement des robot qui ne doivent pas atteindre la sortie
+                if ((profondeur +1 == borne and i > 0) ):# or(self.GDM[x][y] > (borne-profondeur))):
+                    break
+
+            
                 
                 haut = self.movePossibleH(x,y,grille)
                 if haut > 0 and str(i)+'bas'!= mouvement:
@@ -1683,7 +1742,7 @@ class matrice:
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
 
-                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig,profondeur)):
                         
                     
                         paire=self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
@@ -1691,7 +1750,6 @@ class matrice:
                         solution = paire[0] or solution
                         borne = min(paire[1], borne)
                         if paire[0]:
-        
                             listDicoTmp.append(paire[2])
    
 
@@ -1711,7 +1769,8 @@ class matrice:
 
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
-                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig,profondeur)):
                         paire=self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
                                            str(i)+'bas',profondeur+1,borne)
                         solution = paire[0] or solution
@@ -1734,7 +1793,7 @@ class matrice:
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
 
-                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig,profondeur)):
                         paire = self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
                                              str(i)+'gauche',profondeur+1,borne)
                         solution = paire[0] or solution
@@ -1745,7 +1804,7 @@ class matrice:
 
                 droite = self.movePossibleD(x,y,grille)
                 if droite > 0 and str(i)+'gauche'!= mouvement:
-                    #print(i, "droite",x,y)
+                   # print(i, "droite",x,y)
 
                     copieGrille = copy.deepcopy(grille)
                     copieTabRobot = copy.deepcopy(tabRobot)
@@ -1757,7 +1816,7 @@ class matrice:
                     copieDico= copy.deepcopy(dicoListeMove)
                     copieDico[i].append((copieTabRobot[i].getX(),copieTabRobot[i].getY()))
 
-                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig)):
+                    if not (self.dejaPresentDico( copieTabRobot,dicoConfig,profondeur)):
                         paire = self.resPile(copieGrille,copieTabRobot,copieDico,dicoConfig,
                                            str(i)+'droite',profondeur+1,borne)
                         solution = paire[0] or solution
@@ -1766,13 +1825,15 @@ class matrice:
                             listDicoTmp.append(paire[2])
       
 
-
+        
         #on stoque dans une liste les dictionnaire des mouvement effectuer ranvoyer par les appel récursif,
         #on les compare et on renvoie le plus petit dictionnaire (et donc le chemin le plus court pour atteindre l'arriver)                            
         if len(listDicoTmp) > 0:
+            #print(listDicoTmp)
             dicoListeMove = self.plusCourtDico( listDicoTmp) 
 
-                    
+
+             
 
         return (solution, borne, dicoListeMove)
     
