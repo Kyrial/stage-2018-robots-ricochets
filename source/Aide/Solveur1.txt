@@ -1,0 +1,9 @@
+FONCTIONNALITE DE L'APPLICATION
+
+Solveur 1:
+via Résolution Grille:
+
+Calcul le chemin le plus cours pour les robot présent sur la grille.
+Attention: calcul le chemin indépendament des autres robots
+
+Complexité Linéaire.

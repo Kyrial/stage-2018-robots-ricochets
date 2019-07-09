@@ -8,6 +8,7 @@ class interface:
 
     def __init__(self, fen ):
         self.fenetre = fen
+        self.fenetre.title('Jeu Ricochet')
 
 
     def creerCanvas(self, L, l, case,LiCaseExclure = []):

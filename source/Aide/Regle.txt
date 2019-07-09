@@ -1,0 +1,9 @@
+REGLE DU JEU:
+
+Objectif: 
+Amener le ou les robots à une sortie de même couleur, le tout en faisant le moins de mouvement possible.
+
+Règle: 
+Un robot ne peut se déplacer qu’orthogonalement. a chaque mouvement le robot va continuer sa course jusqu'à rencontrer un obstacle. 
+Un obstacle est un mur ou un autre robot.
+

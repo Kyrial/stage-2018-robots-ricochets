@@ -1,0 +1,10 @@
+FONCTIONNALITE DE L'APPLICATION
+
+Solveur 2:
+via Résolution Ricochet:
+
+Solveur prévu pour le mode "jeu robot ricochet".
+
+Calcul le chemin le plus court en intéragissant avec les autre robots.
+
+Attention: très gourmend en temps, complexité exponentielle

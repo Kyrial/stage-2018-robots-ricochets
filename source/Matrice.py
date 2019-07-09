@@ -166,9 +166,7 @@ class matrice:
 ####DEBUT CONSTRUCTION PLATEAU AVEC PLATEAU RICOCHET####
 
     def plateauRicochet(self):
-
-        self.tab = [[case() for x in range(self.l)] for y in range(self.L)]
-            
+        self.tab = [[case() for x in range(self.l)] for y in range(self.L)]           
         self.ajoutBordure()       
         self.f.creerCanvas(self.L,self.l, self.tab,[(7,7),(7,8),(8,7),(8,8)])
 
@@ -191,17 +189,14 @@ class matrice:
 
 
     def ricochetQuartier(self,x,y):
-        tabArete=[[0 for k in range(8)] for l in range(8)]
-        
+        tabArete=[[0 for k in range(8)] for l in range(8)]       
         self.ricochetCarreCentrale(x,y,tabArete)
         self.murRicochet(x,y,tabArete)      
         self.murAngle(x,y,tabArete)        
       
 
     def ricochetCarreCentrale(self,x,y,tabArete):
-
-        tabArete[(x-1)*(-5)+1][(y-1)*(-5)+1]=1
-        
+        tabArete[(x-1)*(-5)+1][(y-1)*(-5)+1]=1       
         self.tab[8-(2*x)][8-(y)].setDroite(True)
         self.tab[8-(x)][8-(2*y)].setBas(True)
         
@@ -229,7 +224,6 @@ class matrice:
                 newX=randint(1,6)+(x*7)
                 newY=randint(1,6)+(y*7)
 
-
             ##on enleve les cas où il y aurait contacte avec un autre mur
             if (positionLibre[newX-(x*7)+i][newY-(y*7)+j]== 0 and
                 (tabArete[newX-(x*7)+(2*i)-1][newY-(y*7)]+
@@ -247,10 +241,7 @@ class matrice:
         for k in range(8):
             positionLibre[newX-(x*7)+i][k]=1
             positionLibre[k][newY-(y*7)+j]=1
-        
-                
-        
-                               
+                                      
 
     def murAngle(self,x,y,tabArete):
         positionLibre=[[0 for k in range(8)] for l in range(8)]
@@ -264,12 +255,7 @@ class matrice:
             for j in range(0,2):
                 self.verifPlacementRicochet( x, y, i, j, positionLibre, tabArete)
 
-
-
-        
-
-
-                
+              
     def placeSortieRicochet(self):
         aleaX=randint(0,15)
         aleaY=randint(0,15)        
@@ -286,13 +272,12 @@ class matrice:
         self.tab[aleaX][aleaY].setSortie(True)
 
 
-
-
-            
-            
-
-
 ####FIN CONSTRUCTION RICOCHET PLATEAU ###
+
+
+
+
+
 
 
 
@@ -1671,8 +1656,6 @@ class matrice:
                 tabRobot[0] = tmp;
        
 
-        
-
         ##pour tracer le chemin après avoir ttrouver la solution
         dicoListeMove ={}
         for i in range(self.bot):
@@ -1683,9 +1666,13 @@ class matrice:
 
         self.GDM = self.creerGrilleDistMin(grille)
 
-        print(dicoListeMove)
+        print("recherche de solutions... \n")
+
+        maxProfondeur = askinteger('profondeur Maximum', 'entrez la profondeur maximum du parcours en profondeur:',initialvalue=4,minvalue=1,maxvalue=23)
+        if maxProfondeur == None:
+            maxProfondeur = 4
         debut = time.time()
-        res=self.resPile(grille,tabRobot,dicoListeMove,dicoConfig,'0', 0, 6)
+        res=self.resPile(grille,tabRobot,dicoListeMove,dicoConfig,'0', 0, maxProfondeur)
         fin = time.time()
     
         print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
@@ -1696,6 +1683,9 @@ class matrice:
             if len(res[2][i])>=2:
                 res[2][i].reverse()
                 self.traceChemin(res[2][i],biai=i)
+
+
+
 
     def resPile(self,grille,tabRobot,dicoListeMove,dicoConfig,mouvement,profondeur,borne):
         #if profondeur !=0:
@@ -1710,12 +1700,11 @@ class matrice:
 
 
         if self.verifSortieParametre(int(mouvement[0]),tabRobot,grille):
-            print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
-            
+            print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")            
             print("pour le robot numero ", mouvement[0], ", grille resolvable, profondeur :", profondeur)
                
             return (True, profondeur-1,dicoListeMove)
-            
+        
             
         elif profondeur < borne:
             for i in range (self.bot):
@@ -1724,7 +1713,6 @@ class matrice:
                 
                 ##inutile de tester les mouvement des robot qui ne doivent pas atteindre la sortie
                 if ((profondeur +1 == borne and i > 0)  or(self.GDM[x][y] > (borne-profondeur))):
-    
                     break
 
             
@@ -1832,9 +1820,6 @@ class matrice:
         if len(listDicoTmp) > 0:
             #print(listDicoTmp)
             dicoListeMove = self.plusCourtDico( listDicoTmp) 
-
-
-             
 
         return (solution, borne, dicoListeMove)
     
@@ -2101,8 +2086,34 @@ def menuRicochet():
     except NameError:
         print("creation du tableau")
     tableau = matrice(mode = "ricochet")  
-        
 
+
+
+
+        
+def menuMessageBox(num=None):
+    nomFichier= 'Aide\Aide.txt' 
+    if num != None:
+        nomFichier = num
+        
+    try:
+        
+        with open(nomFichier,"r") as fichier:   
+
+            text=fichier.read()
+            
+            textBox=Tk()
+            textBox.title('Aide Du Jeu Ricochet')
+            tb = Text(textBox,font=20)
+            tb.insert(INSERT, text)
+
+            tb.configure( state = "disabled")
+            tb.pack()            
+
+    except FileNotFoundError:
+        print("fichier Aide non trouvable ou endommager")
+
+    
 
 
 
@@ -2116,6 +2127,7 @@ def menuRicochet():
 
 #la fenetre du programme
 f=interface(Tk())
+
 
 #f.afficheSaisie()
 ##savoir si un robot est déjà selectionné
@@ -2175,7 +2187,7 @@ else:
 menubar = Menu(f.fenetre)
 
 menu1 = Menu(menubar, tearoff=0)
-menu1.add_command(label="Commencer", command=reset)
+menu1.add_command(label="jouer une grille aléatoire", command=reset)
 menu1.add_command(label="jouer Version Robot Ricochet", command=menuRicochet)
 menu1.add_separator()
 #if tableau !=None:
@@ -2193,6 +2205,25 @@ menu2.add_separator()
 
 menu2.add_command(label="resolution ricochet", command=menuResRicochet)
 menubar.add_cascade(label="resolution", menu=menu2)
+
+menu3 = Menu(menubar, tearoff=0)
+#menu3.add_command(label="Aide", command=menuMessageBox)
+menu3.add_command(label="Regle Du Jeu", command=
+                  lambda arg='Aide\Regle.txt' : menuMessageBox(arg))
+menu3.add_command(label="Fonctionnalité: Génération grille aléatoire", command=
+                  lambda arg='Aide\Alea.txt' : menuMessageBox(arg))
+menu3.add_command(label="Fonctionnalité:Jeu Ricochet", command=
+                  lambda arg='Aide\Ricochet.txt' : menuMessageBox(arg))
+menu3.add_command(label="Fonctionnalité: Editeur", command=
+                  lambda arg='Aide\Editeur.txt' : menuMessageBox(arg))
+menu3.add_command(label="Fonctionnalité:Résolution Grille (indépendant)", command=
+                  lambda arg='Aide\Solveur1.txt' : menuMessageBox(arg))
+menu3.add_command(label="Fonctionnalité: Résolution Ricochet", command=
+                  lambda arg='Aide\Solveur2.txt' : menuMessageBox(arg))
+
+
+
+menubar.add_cascade(label="help", menu=menu3)
 
 f.fenetre.config(menu=menubar)
 

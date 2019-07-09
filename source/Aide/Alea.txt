@@ -1,0 +1,14 @@
+FONCTIONNALITE DE L'APPLICATION
+
+GENERATEUR DE GRILLE (aléatoire): 
+
+Possible de générer aléatoirement un plateau à partir des paramètre par défault ou de les personnalisé grâce à l'écran de controle de droite.
+
+Composition de l'écran de controle:
+Zone de saisis permettant de renseigner
+-taille de la grille
+-nombre de robots/sorties
+-nombre de couleur différentes
+-nombre de coup impartie pour résoudre la grille (si résolvable coché)
+-bouton validé
+Si une zone de saisis est resté vide, la valeur par défault sera retenu.

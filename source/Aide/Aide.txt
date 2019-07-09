@@ -1,0 +1,34 @@
+
+REGLE DU JEU:
+
+Objectif: 
+Amener le ou les robots à une sortie de même couleur, le tout en faisant le moins de mouvement possible.
+
+Règle: 
+Un robot ne peut se déplacer qu’orthogonalement. a chaque mouvement le robot va continuer sa course jusqu'à rencontrer un obstacle. 
+Un obstacle est un mur ou un autre robot.
+
+
+_________
+
+
+FONCTIONNALITE DE L'APPLICATION
+
+GENERATEUR DE GRILLE (aléatoire): 
+
+Possible de générer aléatoirement un plateau à partir des paramètre par défault ou de les personnalisé grâce à l'écran de controle de droite.
+
+Composition de l'écran de controle:
+Zone de saisis permettant de renseigner
+-taille de la grille
+-nombre de robots/sorties
+-nombre de couleur différentes
+-nombre de coup impartie pour résoudre la grille (si résolvable coché)
+-bouton validé
+Si une zone de saisis est resté vide, la valeur par défault sera retenu.
+___
+
+
+
+
+

@@ -1,0 +1,9 @@
+FONCTIONNALITE DE L'APPLICATION
+
+JEU RICOCHET:
+
+création de grille suivant le modèle du jeu via le menu "Jouer version Robot Ricochet".
+
+
+un solveur est assossier a ce type de grille via le menue: résolution ricochet.
+(plus d'information via l'aide résolution)

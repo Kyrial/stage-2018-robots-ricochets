@@ -1,0 +1,22 @@
+FONCTIONNALITE DE L'APPLICATION
+
+EDITEUR DE GRILLE:
+
+Via le menu "Editeur"
+
+l'ecran de controle de droite est modifié.
+cliquez sur les option du panneau de controle pour affecter à la souris:
+
+-lorsque l'icone "robot" est selectionnée, 
+clique gauche sur case vide: place un robot (couleur aléatoire)
+clique gauche sur robot : retire le robot
+
+clique droit sur robot/sortie: enregistre la couleur (action de pipette)
+clique droit sur case vide: place un robot de la dernière couleur enregistrer via la pipette
+
+-Icone "sortie" est selectionnée
+analogue a l'icone "robot" selectionnée
+
+-Icone mur selectionnée:
+clique gauche sur case vide: place le mur
+clique gauche sur case avec mur: enleve le mur
