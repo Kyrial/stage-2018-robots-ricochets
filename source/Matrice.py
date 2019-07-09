@@ -531,26 +531,26 @@ class matrice:
         dicoCouleur= {}
             
         ##on place les robots:
-        for i in range(0,self.bot*3,3):
-            if not (self.fichier[2][i+2] in dicoCouleur ): #si la couleur n'est pas enregistrer 
-                dicoCouleur[self.fichier[2][i+2]] =self.genererCouleur() 
-                self.tabCouleur.append(dicoCouleur[self.fichier[2][i+2]])
-            couleur = dicoCouleur[self.fichier[2][i+2]]
-           
-
+        for j in range(0,self.bot*3,3):
+            if not (self.fichier[2][j+2] in dicoCouleur ): #si la couleur n'est pas enregistrer 
+                dicoCouleur[self.fichier[2][j+2]] =self.genererCouleur() 
+                self.tabCouleur.append(dicoCouleur[self.fichier[2][j+2]])
+            couleur = dicoCouleur[self.fichier[2][j+2]]
             
-            self.tabR.append(robot(int(self.fichier[2][i]),int(self.fichier[2][i+1]),couleur))
-            self.tab[int(self.fichier[2][i])][int(self.fichier[2][i+1])].setRobot(True)
+            self.tabR.append(robot(int(self.fichier[2][j]),int(self.fichier[2][j+1]),couleur))
+            self.tab[int(self.fichier[2][j])][int(self.fichier[2][j+1])].setRobot(True)
+
+
                        
         ##on place les sortie
-        for i in range(0,self.exit*3,3):
-            if not (self.fichier[2][i+2] in dicoCouleur ): #si la couleur n'est pas enregistrer 
-                dicoCouleur[self.fichier[2][i+2]] =self.genererCouleur() 
+        for k in range(0,self.exit*3,3):
+            if not (self.fichier[3][k+2] in dicoCouleur ): #si la couleur n'est pas enregistrer 
+                dicoCouleur[self.fichier[2][k+2]] =self.genererCouleur() 
             
-            couleur = dicoCouleur[self.fichier[2][i+2]]
+            couleur = dicoCouleur[self.fichier[3][k+2]]
            
-            self.tabS.append(sortie(int(self.fichier[3][i]),int(self.fichier[3][i+1]),couleur))
-            self.tab[int(self.fichier[3][i])][int(self.fichier[3][i+1])].setSortie(True)
+            self.tabS.append(sortie(int(self.fichier[3][k]),int(self.fichier[3][k+1]),couleur))
+            self.tab[int(self.fichier[3][k])][int(self.fichier[3][k+1])].setSortie(True)
 
 
 
@@ -1685,7 +1685,7 @@ class matrice:
 
         print(dicoListeMove)
         debut = time.time()
-        res=self.resPile(grille,tabRobot,dicoListeMove,dicoConfig,'0', 0, 5)
+        res=self.resPile(grille,tabRobot,dicoListeMove,dicoConfig,'0', 0, 6)
         fin = time.time()
     
         print("temps d'execution pour trouver la sortie/tester toute les possibilité: ",round(fin - debut,3)," seconde");
@@ -1711,7 +1711,7 @@ class matrice:
 
         if self.verifSortieParametre(int(mouvement[0]),tabRobot,grille):
             print(profondeur, borne,mouvement,tabRobot[int(mouvement[0])].getX(),tabRobot[int(mouvement[0])].getY(), "\n")
- 
+            
             print("pour le robot numero ", mouvement[0], ", grille resolvable, profondeur :", profondeur)
                
             return (True, profondeur-1,dicoListeMove)
@@ -1723,7 +1723,8 @@ class matrice:
                 y =  tabRobot[i].getY()
                 
                 ##inutile de tester les mouvement des robot qui ne doivent pas atteindre la sortie
-                if ((profondeur +1 == borne and i > 0) ):# or(self.GDM[x][y] > (borne-profondeur))):
+                if ((profondeur +1 == borne and i > 0)  or(self.GDM[x][y] > (borne-profondeur))):
+    
                     break
 
             
