@@ -7,3 +7,5 @@ Règle:
 Un robot ne peut se déplacer qu’orthogonalement. a chaque mouvement le robot va continuer sa course jusqu'à rencontrer un obstacle. 
 Un obstacle est un mur ou un autre robot.
 
+
+A TOUT MOMENT, possibilité de sauvegarder/cherger une partie

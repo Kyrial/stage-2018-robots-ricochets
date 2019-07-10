@@ -2222,8 +2222,13 @@ menu3.add_command(label="Fonctionnalité: Résolution Ricochet", command=
                   lambda arg='Aide\Solveur2.txt' : menuMessageBox(arg))
 
 
-
 menubar.add_cascade(label="help", menu=menu3)
+
+menu4 = Menu(menubar, tearoff=0)
+menu4.add_command(label="README", command=
+                  lambda arg='README.md' : menuMessageBox(arg))
+menubar.add_cascade(label="A Propos", menu=menu4)
+
 
 f.fenetre.config(menu=menubar)
 
